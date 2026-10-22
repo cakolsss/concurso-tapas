@@ -3,75 +3,96 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Concurso de tapas</title>
+<title>MasChefFriends II Edición</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700&family=Unbounded:wght@600;800&display=swap" rel="stylesheet">
 <style>
-:root{--azul:#12306b;--azul2:#1d4592;--hueso:#f6f7fb;--azafran:#f4b400;--chile:#d7263d;--tinta:#0e1b3a;--gris:#6b7592;--borde:#d9deec;color-scheme:light}
+:root{--fondo:#0e2a27;--fondo2:#153a35;--linea:#2c5a53;--texto:#f6f1e3;--suave:#9db8b0;--azafran:#ffb627;--chile:#ff4d5e;--pista:#8bd17c;--plato:#fffaf0;color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0}
-body{font-family:"Bricolage Grotesque",system-ui,sans-serif;background:var(--hueso);color:var(--tinta);min-height:100vh;font-size:17px;line-height:1.4}
-header{background-color:#fff;background-image:radial-gradient(circle at 0 0,transparent 0 9px,var(--azul2) 10px 12px,transparent 13px),radial-gradient(circle at 100% 100%,transparent 0 9px,var(--azul2) 10px 12px,transparent 13px);background-size:28px 28px;border-bottom:4px solid var(--azul);padding:22px 18px}
-header h1{margin:0;font-size:2.1rem;font-weight:800;letter-spacing:-.02em;color:var(--azul);background:#fff;display:inline-block;padding:2px 12px;border-radius:4px}
-main{max-width:640px;margin:0 auto;padding:18px}
-button{font:inherit;cursor:pointer;border:0;border-radius:10px;padding:12px 16px;font-weight:600}
+body{font-family:Figtree,system-ui,sans-serif;font-size:17px;line-height:1.4;color:var(--texto);min-height:100vh;background:radial-gradient(120% 55% at 50% -10%,#1d5049 0,var(--fondo) 62%) no-repeat,var(--fondo)}
+header{border-bottom:1px solid var(--linea)}
+.mantel{height:24px;background-color:#fff8ec;background-image:repeating-linear-gradient(0deg,rgba(255,77,94,.65) 0 8px,transparent 8px 16px),repeating-linear-gradient(90deg,rgba(255,77,94,.65) 0 8px,transparent 8px 16px)}
+.marca{max-width:640px;margin:0 auto;padding:16px 18px;display:flex;align-items:center;gap:14px}
+.marca svg{flex:none}
+.ed{display:inline-block;background:var(--chile);color:#fff;font-weight:700;font-size:.8rem;padding:2px 10px;border-radius:20px;margin-bottom:4px}
+h1{font-family:Unbounded,sans-serif;font-weight:800;font-size:clamp(1.45rem,7vw,2.1rem);line-height:1.05;margin:0;letter-spacing:-.02em}
+h2{font-family:Unbounded,sans-serif;font-weight:600;font-size:1.25rem;margin:4px 0 6px}
+main{max-width:640px;margin:0 auto;padding:18px 18px 70px}
+button{font:inherit;cursor:pointer;border:0;border-radius:12px;padding:12px 16px;font-weight:700}
 button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--azafran);outline-offset:2px}
-.pri{background:var(--azul);color:#fff}
-.sec{background:#fff;color:var(--azul);border:2px solid var(--azul)}
+.pri{background:var(--azafran);color:var(--fondo)}
+.sec{background:transparent;color:var(--texto);border:2px solid var(--linea)}
 .peligro{background:var(--chile);color:#fff}
 .barra{display:flex;gap:10px;margin:0 0 16px}
 .barra button{flex:1}
-.prog{margin:0 0 14px;color:var(--gris)}
-.rejilla{display:grid;grid-template-columns:1fr 1fr;gap:12px;list-style:none;padding:0;margin:0}
-.tapa{width:100%;text-align:left;background:#fff;border:2px solid var(--borde);min-height:104px;display:flex;flex-direction:column;justify-content:space-between;padding:14px}
-.tapa b{font-size:1.15rem}
-.tapa.ok{border-color:var(--azul);background:#eef3ff}
-.tapa small{color:var(--gris)}
-.tapa.ok small{color:var(--azul);font-weight:600}
-h2{font-size:1.6rem;margin:6px 0 4px;letter-spacing:-.01em}
-.crit{background:#fff;border:2px solid var(--borde);border-radius:14px;padding:12px 14px;margin:0 0 12px}
-.crit .fila-c{display:flex;justify-content:space-between;align-items:baseline}
-.crit label{font-weight:600}
-.crit output{font-size:2.4rem;font-weight:800;color:var(--azul);min-width:3ch;text-align:right}
-.crit.sin output{color:var(--borde)}
-input[type=range]{width:100%;height:38px;background:transparent;-webkit-appearance:none;appearance:none}
-input[type=range]::-webkit-slider-runnable-track{height:10px;border-radius:6px;background:linear-gradient(90deg,var(--azul2),var(--azafran))}
-input[type=range]::-moz-range-track{height:10px;border-radius:6px;background:linear-gradient(90deg,var(--azul2),var(--azafran))}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:32px;height:32px;margin-top:-11px;border-radius:50%;background:#fff;border:4px solid var(--azul)}
-input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;background:#fff;border:4px solid var(--azul)}
-.crit.sin input[type=range]::-webkit-slider-thumb{border-color:var(--gris)}
-textarea,input[type=password]{width:100%;font:inherit;padding:12px;border:2px solid var(--borde);border-radius:10px;background:#fff}
+.prog{margin:0 0 16px;color:var(--suave)}
+.rejilla{display:grid;grid-template-columns:1fr 1fr;gap:16px 14px;list-style:none;padding:0;margin:0}
+.tapa{width:100%;background:transparent;color:var(--texto);padding:4px;display:flex;flex-direction:column;align-items:center;gap:8px;transition:transform .15s}
+.tapa:active{transform:scale(.96)}
+.plato{display:grid;place-content:center;text-align:center;width:100%;aspect-ratio:1;border-radius:50%;color:var(--fondo);background:radial-gradient(circle,var(--plato) 0 57%,var(--anillo,#d6ccb0) 58% 61%,var(--plato) 62% 100%);box-shadow:0 10px 20px rgba(0,0,0,.4)}
+.plato b{font-family:Unbounded,sans-serif;font-size:2rem;line-height:1}
+.plato small{font-size:.72rem;color:#5d6e68;font-weight:600}
+.tapa.ok .plato{--anillo:var(--azafran)}
+.cap{font-weight:600;font-size:.95rem}
+.plato.grande{width:112px;margin:0 auto 10px}
+.crit{background:var(--fondo2);border:1px solid var(--linea);border-radius:16px;padding:12px 14px;margin:0 0 12px}
+.fila-c{display:flex;justify-content:space-between;align-items:baseline}
+.crit label{font-weight:700}
+.crit output{font-family:Unbounded,sans-serif;font-size:1.9rem;font-weight:800;color:var(--azafran);min-width:3ch;text-align:right}
+.crit.sin output{color:var(--linea)}
+input[type=range]{width:100%;height:44px;background:transparent;-webkit-appearance:none;appearance:none}
+input[type=range]::-webkit-slider-runnable-track{height:10px;border-radius:6px;background:linear-gradient(90deg,var(--chile),var(--azafran),var(--pista))}
+input[type=range]::-moz-range-track{height:10px;border-radius:6px;background:linear-gradient(90deg,var(--chile),var(--azafran),var(--pista))}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:38px;height:38px;margin-top:-14px;border:0;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%23fffaf0' stroke='%23ffb627' stroke-width='2'/%3E%3Ccircle cx='16' cy='16' r='8' fill='none' stroke='%23d6ccb0' stroke-width='2'/%3E%3C/svg%3E") center/cover}
+input[type=range]::-moz-range-thumb{width:38px;height:38px;border:0;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%23fffaf0' stroke='%23ffb627' stroke-width='2'/%3E%3Ccircle cx='16' cy='16' r='8' fill='none' stroke='%23d6ccb0' stroke-width='2'/%3E%3C/svg%3E") center/cover}
+.crit.sin input[type=range]::-webkit-slider-thumb{opacity:.55}
+.crit.sin input[type=range]::-moz-range-thumb{opacity:.55}
+textarea,input[type=password]{width:100%;font:inherit;color:var(--texto);padding:12px;border:2px solid var(--linea);border-radius:12px;background:#0a201e}
 textarea{min-height:78px;resize:vertical}
-.aviso{background:#fff7dc;border:2px solid var(--azafran);border-radius:10px;padding:10px 12px;margin:0 0 12px}
-.err{color:var(--chile);font-weight:600}
-#gate{max-width:360px;margin:40px auto;display:grid;gap:12px}
-.toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:var(--tinta);color:#fff;padding:8px 16px;border-radius:20px;font-size:.95rem;opacity:0;transition:opacity .25s;pointer-events:none}
+.aviso{background:rgba(255,182,39,.12);border:1px solid var(--azafran);border-radius:12px;padding:10px 12px;margin:0 0 14px}
+.err{color:var(--chile);font-weight:700}
+#gate{max-width:360px;margin:34px auto;display:grid;gap:12px}
+.toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:var(--texto);color:var(--fondo);font-weight:700;padding:8px 16px;border-radius:20px;font-size:.95rem;opacity:0;transition:opacity .25s;pointer-events:none}
 .toast.on{opacity:1}
+.adm{position:fixed;right:10px;bottom:10px;width:34px;height:34px;padding:0;border-radius:50%;background:transparent;color:var(--texto);opacity:.28;display:grid;place-items:center}
+.adm:hover,.adm:focus-visible{opacity:.9}
 ol.rank{list-style:none;margin:0;padding:0;display:grid;gap:12px}
-.fila{display:grid;grid-template-columns:36px 1fr auto;gap:12px;align-items:center;background:#fff;border:2px solid var(--borde);border-radius:14px;padding:12px;animation:sube .6s both;animation-delay:var(--d,0s)}
-.fila:first-child{border-color:var(--azafran);border-width:3px}
-.pos{font-size:1.6rem;font-weight:800;color:var(--azul)}
-.fila small{color:var(--gris);display:block}
-.tier{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:1.5rem;background:var(--gris);color:#fff}
-.tier[data-t="S+"]{background:var(--azafran);color:var(--tinta)}
+.fila{display:grid;grid-template-columns:32px 1fr auto;gap:4px 12px;align-items:center;background:var(--fondo2);border:1px solid var(--linea);border-radius:16px;padding:12px;animation:sube .6s both;animation-delay:var(--d,0s)}
+.fila.quieta{animation:none}
+.fila:first-child{border:2px solid var(--azafran);box-shadow:0 0 28px rgba(255,182,39,.25)}
+.pos{font-family:Unbounded,sans-serif;font-size:1.3rem;font-weight:800;color:var(--azafran)}
+.fila small{color:var(--suave);display:block}
+.copa{display:inline-block;background:var(--azafran);color:var(--fondo);font-weight:700;font-size:.75rem;padding:1px 8px;border-radius:20px;margin-bottom:2px}
+.tier{min-width:58px;height:58px;padding:0 8px;border-radius:30px;display:grid;place-items:center;font-family:Unbounded,sans-serif;font-weight:800;font-size:1.2rem;background:#51706a;color:#fff}
+.tier[data-t="S++"]{background:linear-gradient(135deg,#fff3b0,#ffb627 55%,#ff8a00);color:var(--fondo)}
+.tier[data-t="S+"]{background:var(--azafran);color:var(--fondo)}
 .tier[data-t="S"]{background:var(--chile)}
-.tier[data-t="A"]{background:var(--azul)}
-.tier[data-t="B"]{background:var(--azul2)}
-.nota{grid-column:2/4;font-weight:600}
-.mini{grid-column:2/4;display:grid;grid-template-columns:auto 1fr auto;gap:2px 8px;font-size:.88rem;align-items:center}
-.mini i{display:block;height:6px;border-radius:3px;background:var(--borde);position:relative;overflow:hidden}
-.mini i::after{content:"";position:absolute;inset:0 auto 0 0;width:var(--w);background:var(--azul2)}
-.coment{grid-column:2/4;color:var(--gris);font-size:.9rem;border-left:3px solid var(--borde);padding-left:8px}
-.premios{margin:24px 0 0;padding:0;list-style:none;display:grid;gap:8px}
-.premios li{background:#fff;border:2px dashed var(--azul2);border-radius:10px;padding:8px 12px}
+.tier[data-t="A"]{background:#ff8a3d;color:var(--fondo)}
+.tier[data-t="B"]{background:var(--pista);color:var(--fondo)}
+.tier[data-t="C"]{background:#4fb3a6;color:var(--fondo)}
+.nota{grid-column:2/4;font-weight:700}
+.mini{grid-column:2/4;display:grid;grid-template-columns:auto 1fr auto;gap:3px 8px;font-size:.88rem;align-items:center;color:var(--suave)}
+.mini i{display:block;height:6px;border-radius:3px;background:var(--fondo);position:relative;overflow:hidden}
+.mini i::after{content:"";position:absolute;inset:0 auto 0 0;width:var(--w);background:var(--azafran)}
+.coment{grid-column:2/4;color:var(--suave);font-size:.9rem;border-left:3px solid var(--linea);padding-left:8px}
+.premios{margin:0;padding:0;list-style:none;display:grid;gap:8px}
+.premios li{background:var(--fondo2);border:1px dashed var(--azafran);border-radius:12px;padding:8px 12px}
 @keyframes sube{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
-@media (prefers-reduced-motion:reduce){.fila{animation:none}.toast{transition:none}}
+@media (prefers-reduced-motion:reduce){.fila{animation:none}.toast,.tapa{transition:none}}
 </style>
 </head>
 <body>
-<header><h1>Concurso de tapas</h1></header>
+<header>
+  <div class="mantel"></div>
+  <div class="marca">
+    <svg viewBox="0 0 64 64" width="56" height="56" aria-hidden="true"><g fill="#f6f1e3"><circle cx="20" cy="26" r="12"/><circle cx="32" cy="19" r="13"/><circle cx="44" cy="26" r="12"/><rect x="16" y="30" width="32" height="20" rx="3"/></g><rect x="16" y="45" width="32" height="9" rx="2" fill="#ffb627"/></svg>
+    <div><span class="ed">II Edición</span><h1>MasChefFriends</h1></div>
+  </div>
+</header>
 <main id="app"></main>
+<button class="adm" data-a="adm" aria-label="Organizador" title="Organizador"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7z"/></svg></button>
 <div class="toast" id="toast"></div>
 
 <script type="module">
@@ -80,11 +101,11 @@ import {getAuth,signInAnonymously,onAuthStateChanged} from "https://www.gstatic.
 import {getFirestore,doc,setDoc,onSnapshot,collection} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 /* ============ LO ÚNICO QUE TIENES QUE CAMBIAR ============ */
-const CONFIG = {            // lo copias de Firebase (paso 3 de la guía)
+const CONFIG = {
   apiKey:"AIzaSyAjJ8kHKuEfqCAWLx3L3iCLBfhKRHvOfag", authDomain:"tapas-eff9e.firebaseapp.com", projectId:"tapas-eff9e",
   storageBucket:"tapas-eff9e.firebasestorage.app", messagingSenderId:"856788556147", appId:"1:856788556147:web:26f59f1007a9fdf1e94d06"
 };
-const CLAVE = "tapa";            // contraseña para entrar a votar
+const CLAVE = "tapa";                 // contraseña para entrar a votar
 const CLAVE_ORGANIZADOR = "chef";     // contraseña del organizador (cámbiala)
 const TAPAS = [                       // añade, quita o cambia las que quieras
   {id:"t1", etiqueta:"Tapa de persona 1", nombre:"Nombre real de la tapa", autor:"Quién la hizo"},
@@ -105,8 +126,8 @@ const CRITERIOS = [
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const fmt=n=>Number.isInteger(n)?String(n):n.toFixed(1);
-const tier=n=>n>=9?"S+":n>=8?"S":n>=7?"A":n>=6?"B":"C";
-let db,uid,mine={r:{},c:{}},estado={},votos=[],vista="lista",actual=null,admin=false,timer;
+const tier=n=>n>=9.999?"S++":n>=9.5?"S+":n>=9?"S":n>=8?"A":n>=7?"B":n>=6?"C":n>=5?"D":n>=4?"E":"F";
+let db,uid,mine={r:{},c:{}},estado={},votos=[],vista="lista",actual=null,admin=false,timer,animado=false;
 
 function toast(m){const e=$("#toast");e.textContent=m;e.classList.add("on");clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove("on"),1400)}
 const completa=id=>CRITERIOS.every(c=>mine.r[id]?.[c.k]!=null);
@@ -118,7 +139,7 @@ function puerta(){
   <input type="password" id="pw" placeholder="Contraseña" autocomplete="off" autofocus>
   <button class="pri">Entrar</button><p class="err" id="e"></p></form>`;
   $("#gate").onsubmit=e=>{e.preventDefault();
-    if($("#pw").value===CLAVE){localStorage.setItem("tapas-ok","1");arrancar()}
+    if($("#pw").value.trim().toLowerCase()===CLAVE.toLowerCase()){localStorage.setItem("tapas-ok","1");arrancar()}
     else $("#e").textContent="Esa no es la clave. Pregúntasela al organizador."};
 }
 
@@ -135,7 +156,10 @@ function escuchar(){
     if(vista==="detalle")return;
     if(s.exists()){const d=s.data();mine={r:d.r||{},c:d.c||{}}}
     pintar()});
-  onSnapshot(doc(db,"config","estado"),s=>{estado=s.exists()?s.data():{};if(vista!=="detalle")pintar()});
+  onSnapshot(doc(db,"config","estado"),s=>{
+    estado=s.exists()?s.data():{};
+    if(!estado.closed)animado=false;
+    if(estado.closed||vista!=="detalle")pintar()});
   onSnapshot(collection(db,"votes"),s=>{votos=s.docs.map(d=>d.data());if(vista==="resultados"||vista==="admin")pintar()});
   pintar();
 }
@@ -148,24 +172,23 @@ function guardar(){
 /* ---------- Pantallas ---------- */
 function pantallaLista(){
   const hechas=TAPAS.filter(t=>completa(t.id)).length;
-  return `<div class="barra"><button class="sec" data-a="res">Resultados</button><button class="sec" data-a="adm">Organizador</button></div>
-  ${estado.closed?'<p class="aviso">La votación está cerrada. Ya no se pueden cambiar los votos.</p>':''}
-  <p class="prog">Has votado ${hechas} de ${TAPAS.length} tapas. Toca una para puntuarla; puedes volver a cambiarla cuando quieras.</p>
-  <ul class="rejilla">${TAPAS.map(t=>{
+  return `<h2>Puntúa cada tapa</h2>
+  <p class="prog">Has votado ${hechas} de ${TAPAS.length}. Toca un plato para puntuarlo; puedes volver y cambiar tu nota mientras la votación siga abierta.</p>
+  <ul class="rejilla">${TAPAS.map((t,i)=>{
     const ok=completa(t.id),vals=CRITERIOS.map(c=>mine.r[t.id]?.[c.k]).filter(v=>v!=null);
-    const txt=ok?"Tu nota: "+fmt(media(vals)):vals.length?"A medias":"Sin votar";
-    return `<li><button class="tapa ${ok?"ok":""}" data-a="abrir" data-id="${t.id}"><b>${esc(t.etiqueta)}</b><small>${txt}</small></button></li>`}).join("")}</ul>`;
+    return `<li><button class="tapa ${ok?"ok":""}" data-a="abrir" data-id="${t.id}"><span class="plato"><b>${ok?fmt(media(vals)):i+1}</b><small>${ok?"tu nota":vals.length?"a medias":"sin votar"}</small></span><span class="cap">${esc(t.etiqueta)}</span></button></li>`}).join("")}</ul>`;
 }
 function pantallaDetalle(){
-  const t=TAPAS.find(x=>x.id===actual),r=mine.r[actual]||{},cerrada=!!estado.closed;
+  const i=TAPAS.findIndex(x=>x.id===actual),t=TAPAS[i],r=mine.r[actual]||{};
   return `<div class="barra"><button class="sec" data-a="volver">Volver a las tapas</button></div>
-  <h2>${esc(t.etiqueta)}</h2>
-  ${cerrada?'<p class="aviso">La votación está cerrada.</p>':'<p class="prog">Mueve cada barra de 0 a 10. Se guarda sola.</p>'}
+  <span class="plato grande"><b>${i+1}</b><small>tapa</small></span>
+  <h2 style="text-align:center">${esc(t.etiqueta)}</h2>
+  <p class="prog" style="text-align:center">Mueve cada plato de 0 a 10. Se guarda solo.</p>
   ${CRITERIOS.map(c=>{const v=r[c.k];return `<div class="crit ${v==null?"sin":""}" id="c-${c.k}">
     <div class="fila-c"><label for="s-${c.k}">${c.n}</label><output>${v==null?"–":fmt(v)}</output></div>
-    <input type="range" id="s-${c.k}" data-k="${c.k}" min="0" max="10" step="0.5" value="${v??5}" ${cerrada?"disabled":""}></div>`}).join("")}
+    <input type="range" id="s-${c.k}" data-k="${c.k}" min="0" max="10" step="0.5" value="${v??5}"></div>`}).join("")}
   <label for="com" class="prog">Comentario (opcional, anónimo)</label>
-  <textarea id="com" ${cerrada?"disabled":""}>${esc(mine.c[actual]||"")}</textarea>`;
+  <textarea id="com">${esc(mine.c[actual]||"")}</textarea>`;
 }
 function calcular(){
   return TAPAS.map(t=>{
@@ -176,17 +199,16 @@ function calcular(){
   }).filter(t=>t.total!=null).sort((a,b)=>b.total-a.total);
 }
 function pantallaResultados(){
-  const volver=`<div class="barra"><button class="sec" data-a="volver">Volver</button></div>`;
-  if(!estado.revealed)return volver+`<h2>Todavía es un secreto</h2><p class="prog">Los resultados aparecen cuando el organizador los revele. ${votos.length} personas ya han votado algo.</p>`;
-  const rank=calcular();
-  if(!rank.length)return volver+"<p class='prog'>Aún no hay votos.</p>";
-  const n=rank.length;
+  const rank=calcular(),n=rank.length;
+  const cab=`<h2>Resultados</h2><p class="prog">La votación está cerrada. Esta es la clasificación final.</p>`;
+  if(!n)return cab+"<p class='prog'>No hubo votos.</p>";
   const premios=CRITERIOS.map(c=>{
     const mejor=rank.map(t=>({t,v:t.por.find(p=>p.k===c.k).v})).filter(x=>x.v!=null).sort((a,b)=>b.v-a.v)[0];
-    return mejor?`<li><b>Mejor ${c.n.toLowerCase()}:</b> ${esc(mejor.t.nombre)} (${fmt(+mejor.v.toFixed(1))})</li>`:""}).join("");
-  return volver+`<h2>Y los ganadores son…</h2><ol class="rank">${rank.map((t,i)=>`
-    <li class="fila" style="--d:${((n-1-i)*0.7).toFixed(1)}s"><span class="pos">${i+1}</span>
-      <div><b>${esc(t.nombre)}</b><small>${esc(t.etiqueta)}, de ${esc(t.autor)}</small></div>
+    return mejor?`<li><b>Mejor ${c.n.toLowerCase()}:</b> ${esc(mejor.t.nombre)} (${mejor.v.toFixed(1)})</li>`:""}).join("");
+  const cls=animado?"fila quieta":"fila";animado=true;
+  return cab+`<ol class="rank">${rank.map((t,i)=>`
+    <li class="${cls}" style="--d:${((n-1-i)*0.7).toFixed(1)}s"><span class="pos">${i+1}</span>
+      <div>${i===0?'<span class="copa">Tapa ganadora</span>':''}<b>${esc(t.nombre)}</b><small>${esc(t.etiqueta)}, de ${esc(t.autor)}</small></div>
       <span class="tier" data-t="${tier(t.total)}">${tier(t.total)}</span>
       <span class="nota">Nota media: ${t.total.toFixed(2)}</span>
       <div class="mini">${t.por.map(p=>p.v==null?"":`<span>${p.n}</span><i style="--w:${p.v*10}%"></i><span>${p.v.toFixed(1)}</span>`).join("")}</div>
@@ -196,28 +218,28 @@ function pantallaResultados(){
 function pantallaAdmin(){
   return `<div class="barra"><button class="sec" data-a="volver">Volver</button></div>
   <h2>Panel del organizador</h2>
-  <p class="prog">${votos.length} personas han votado algo.</p>
-  <div class="barra"><button class="${estado.closed?"pri":"peligro"}" data-a="cerrar">${estado.closed?"Reabrir la votación":"Cerrar la votación"}</button></div>
-  <div class="barra"><button class="${estado.revealed?"sec":"pri"}" data-a="revelar">${estado.revealed?"Volver a ocultar resultados":"Revelar resultados"}</button></div>`;
+  <p class="prog">${votos.length} personas han votado algo. ${estado.closed?"La votación está cerrada y todos ven los resultados.":"La votación está abierta."}</p>
+  ${estado.closed?"":'<p class="aviso">Al cerrar, todos verán solo los resultados y nadie podrá cambiar su voto.</p>'}
+  <div class="barra"><button class="${estado.closed?"pri":"peligro"}" data-a="cerrar">${estado.closed?"Reabrir la votación":"Cerrar votación y mostrar resultados"}</button></div>`;
 }
 function pintar(){
   if(!uid)return;
+  if(estado.closed&&vista!=="admin")vista="resultados";
+  else if(!estado.closed&&vista==="resultados")vista="lista";
   const f={lista:pantallaLista,detalle:pantallaDetalle,resultados:pantallaResultados,admin:pantallaAdmin}[vista];
-  $("#app").innerHTML=f();window.scrollTo(0,0);
+  $("#app").innerHTML=f();
 }
 
 /* ---------- Eventos ---------- */
 document.addEventListener("click",e=>{
-  const b=e.target.closest("[data-a]");if(!b)return;
+  const b=e.target.closest("[data-a]");if(!b||!uid)return;
   const a=b.dataset.a;
-  if(a==="abrir"){actual=b.dataset.id;vista="detalle";pintar()}
-  else if(a==="volver"){vista="lista";pintar()}
-  else if(a==="res"){vista="resultados";pintar()}
+  if(a==="abrir"){actual=b.dataset.id;vista="detalle";pintar();scrollTo(0,0)}
+  else if(a==="volver"){vista="lista";pintar();scrollTo(0,0)}
   else if(a==="adm"){
-    if(admin||prompt("Clave del organizador")===CLAVE_ORGANIZADOR){admin=true;vista="admin";pintar()}
+    if(admin||prompt("Clave del organizador")===CLAVE_ORGANIZADOR){admin=true;vista="admin";pintar();scrollTo(0,0)}
     else toast("Clave incorrecta")}
   else if(a==="cerrar")setDoc(doc(db,"config","estado"),{closed:!estado.closed},{merge:true});
-  else if(a==="revelar")setDoc(doc(db,"config","estado"),{revealed:!estado.revealed},{merge:true});
 });
 document.addEventListener("input",e=>{
   const el=e.target;
