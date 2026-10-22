@@ -79,8 +79,23 @@ ol.rank{list-style:none;margin:0;padding:0;display:grid;gap:12px}
 .coment{grid-column:2/4;color:var(--suave);font-size:.9rem;border-left:3px solid var(--linea);padding-left:8px}
 .premios{margin:0;padding:0;list-style:none;display:grid;gap:8px}
 .premios li{background:var(--fondo2);border:1px dashed var(--azafran);border-radius:12px;padding:8px 12px}
+.abierta{grid-column:1/-1}
+.carta{background:var(--fondo2);border:1px solid var(--linea);border-radius:18px;padding:16px;text-align:center;display:grid;gap:6px;justify-items:center}
+.carta small{color:var(--suave);font-weight:600}
+.nom{font-family:Unbounded,sans-serif;font-size:1.35rem;line-height:1.15}
+.aut{color:var(--azafran);font-weight:700}
+.veredicto{display:flex;align-items:center;gap:12px;margin-top:6px}
+.veredicto .nm{font-weight:700}
+.carta .mini,.carta .coment{grid-column:auto;width:100%;text-align:left}
+.pop .carta,.rank.pop{animation:pop .5s both}
+.tapa.listo .plato{--anillo:var(--azafran);animation:late 1.3s ease-in-out infinite}
+.finalbox{margin:22px 0;text-align:center;display:grid;gap:10px}
+.finalbox .pri{font-size:1.05rem;padding:16px}
+.chico{display:block;margin:22px auto 0;font-size:.9rem;padding:8px 14px}
+@keyframes pop{from{opacity:0;transform:scale(.9) translateY(10px)}to{opacity:1;transform:none}}
+@keyframes late{50%{transform:scale(1.06)}}
 @keyframes sube{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
-@media (prefers-reduced-motion:reduce){.fila{animation:none}.toast,.tapa{transition:none}}
+@media (prefers-reduced-motion:reduce){.fila,.pop .carta,.rank.pop,.tapa.listo .plato{animation:none}.toast,.tapa{transition:none}}
 </style>
 </head>
 <body>
@@ -127,7 +142,8 @@ const $=s=>document.querySelector(s);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const fmt=n=>Number.isInteger(n)?String(n):n.toFixed(1);
 const tier=n=>n>=9.999?"S++":n>=9.5?"S+":n>=9?"S":n>=8?"A":n>=7?"B":n>=6?"C":n>=5?"D":n>=4?"E":"F";
-let db,uid,mine={r:{},c:{}},estado={},votos=[],vista="lista",actual=null,admin=false,timer,animado=false;
+let rev={e:{},f:0},revRonda=null,nuevos=new Set();
+let db,uid,mine={r:{},c:{}},raw=null,todos=[],ronda=null,estado={},votos=[],vista="lista",actual=null,admin=false,timer,animado=false;
 
 function toast(m){const e=$("#toast");e.textContent=m;e.classList.add("on");clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove("on"),1400)}
 const completa=id=>CRITERIOS.every(c=>mine.r[id]?.[c.k]!=null);
@@ -151,21 +167,25 @@ async function arrancar(){
   try{await signInAnonymously(auth)}
   catch(e){$("#app").innerHTML="<p class='err'>No se pudo conectar. Revisa la configuración de Firebase y que el acceso anónimo esté activado.</p>"}
 }
+function sinc(forzar){
+  votos=todos.filter(x=>(x.ronda||0)===(estado.ronda||0));
+  if(vista!=="detalle"||forzar)mine=raw&&(raw.ronda||0)===(estado.ronda||0)?{r:raw.r||{},c:raw.c||{}}:{r:{},c:{}};
+}
 function escuchar(){
-  onSnapshot(doc(db,"votes",uid),s=>{
-    if(vista==="detalle")return;
-    if(s.exists()){const d=s.data();mine={r:d.r||{},c:d.c||{}}}
-    pintar()});
+  onSnapshot(doc(db,"votes",uid),s=>{raw=s.exists()?s.data():null;sinc();if(vista!=="detalle")pintar()});
   onSnapshot(doc(db,"config","estado"),s=>{
     estado=s.exists()?s.data():{};
-    if(!estado.closed)animado=false;
+    if(!estado.closed){animado=false;revRonda=null;try{localStorage.removeItem("tapas-rev-"+(estado.ronda||0))}catch(_){}}
+    const r=estado.ronda||0,nueva=ronda!==null&&r!==ronda;ronda=r;
+    if(nueva){clearTimeout(timer);if(vista==="detalle")vista="lista";animado=false}
+    sinc(nueva);
     if(estado.closed||vista!=="detalle")pintar()});
-  onSnapshot(collection(db,"votes"),s=>{votos=s.docs.map(d=>d.data());if(vista==="resultados"||vista==="admin")pintar()});
+  onSnapshot(collection(db,"votes"),s=>{todos=s.docs.map(d=>d.data());sinc();if(vista==="resultados"||vista==="admin")pintar()});
   pintar();
 }
 function guardar(){
   clearTimeout(timer);
-  timer=setTimeout(()=>setDoc(doc(db,"votes",uid),{r:mine.r,c:mine.c},{merge:true})
+  timer=setTimeout(()=>setDoc(doc(db,"votes",uid),{r:mine.r,c:mine.c,ronda:estado.ronda||0})
     .then(()=>toast("Guardado")).catch(()=>toast("No se pudo guardar")),350);
 }
 
@@ -198,29 +218,57 @@ function calcular(){
     return {...t,por,total,coms};
   }).filter(t=>t.total!=null).sort((a,b)=>b.total-a.total);
 }
+function cargarRev(){
+  const r=estado.ronda||0;if(revRonda===r)return;revRonda=r;
+  try{rev=JSON.parse(localStorage.getItem("tapas-rev-"+r))||{e:{},f:0}}catch(_){rev={e:{},f:0}}
+}
+function guardarRev(){try{localStorage.setItem("tapas-rev-"+revRonda,JSON.stringify(rev))}catch(_){}}
+function datosRev(){
+  const rank=calcular(),fin=rank.slice(0,2),ids=new Set(fin.map(t=>t.id)),resto=rank.filter(t=>!ids.has(t.id));
+  return {rank,fin,ids,resto,pend:resto.filter(t=>(rev.e[t.id]||0)<2).length};
+}
+const nivel=(id,d)=>d.ids.has(id)?rev.f:(rev.e[id]||0);
+function marcar(ids){nuevos=new Set(ids);setTimeout(()=>nuevos.clear(),800)}
 function pantallaResultados(){
-  const rank=calcular(),n=rank.length;
-  const cab=`<h2>Resultados</h2><p class="prog">La votación está cerrada. Esta es la clasificación final.</p>`;
-  if(!n)return cab+"<p class='prog'>No hubo votos.</p>";
-  const premios=CRITERIOS.map(c=>{
-    const mejor=rank.map(t=>({t,v:t.por.find(p=>p.k===c.k).v})).filter(x=>x.v!=null).sort((a,b)=>b.v-a.v)[0];
-    return mejor?`<li><b>Mejor ${c.n.toLowerCase()}:</b> ${esc(mejor.t.nombre)} (${mejor.v.toFixed(1)})</li>`:""}).join("");
-  const cls=animado?"fila quieta":"fila";animado=true;
-  return cab+`<ol class="rank">${rank.map((t,i)=>`
-    <li class="${cls}" style="--d:${((n-1-i)*0.7).toFixed(1)}s"><span class="pos">${i+1}</span>
-      <div>${i===0?'<span class="copa">Tapa ganadora</span>':''}<b>${esc(t.nombre)}</b><small>${esc(t.etiqueta)}, de ${esc(t.autor)}</small></div>
-      <span class="tier" data-t="${tier(t.total)}">${tier(t.total)}</span>
-      <span class="nota">Nota media: ${t.total.toFixed(2)}</span>
-      <div class="mini">${t.por.map(p=>p.v==null?"":`<span>${p.n}</span><i style="--w:${p.v*10}%"></i><span>${p.v.toFixed(1)}</span>`).join("")}</div>
-      ${t.coms.map(c=>`<div class="coment">${esc(c)}</div>`).join("")}</li>`).join("")}</ol>
-    <h2 style="margin-top:28px">Premios</h2><ul class="premios">${premios}</ul>`;
+  cargarRev();
+  const d=datosRev(),{rank,pend}=d,n=rank.length;
+  if(!n)return "<h2>Resultados</h2><p class='prog'>No hubo votos.</p>";
+  const completo=rev.f===2&&pend===0,listo=pend===0&&rev.f===0;
+  const grid=TAPAS.filter(t=>rank.some(r=>r.id===t.id)).map(t=>{
+    const x=rank.find(r=>r.id===t.id),st=nivel(t.id,d),esF=d.ids.has(t.id);
+    if(st===0)return `<li><button class="tapa ${listo&&esF?"listo":""}" data-a="voltear" data-id="${t.id}"><span class="plato"><b>?</b><small>toca para ver</small></span><span class="cap">${esc(t.etiqueta)}</span></button></li>`;
+    const detalle=st===1?(esF?"":`<button class="pri" data-a="nota" data-id="${t.id}">Ver su nota</button>`)
+      :`<div class="veredicto"><span class="tier" data-t="${tier(x.total)}">${tier(x.total)}</span><span class="nm">Nota media ${x.total.toFixed(2)}</span></div>
+        <div class="mini">${x.por.map(p=>p.v==null?"":`<span>${p.n}</span><i style="--w:${p.v*10}%"></i><span>${p.v.toFixed(1)}</span>`).join("")}</div>
+        ${x.coms.map(c=>`<div class="coment">${esc(c)}</div>`).join("")}`;
+    return `<li class="abierta${nuevos.has(t.id)?" pop":""}"><div class="carta"><small>${esc(t.etiqueta)}</small><b class="nom">${esc(x.nombre)}</b><span class="aut">de ${esc(x.autor)}</span>${detalle}</div></li>`}).join("");
+  let acc="";
+  if(rev.f===0&&pend>0)acc=`<p class="prog" style="text-align:center">Quedan ${pend} por revelar antes del gran final.</p>`;
+  else if(rev.f===0)acc=`<div class="finalbox"><p class="prog">Solo quedan las dos mejores. ¿Listos?</p><button class="pri" data-a="final">Revelar las dos mejores a la vez</button></div>`;
+  else if(rev.f===1)acc=`<div class="finalbox"><button class="pri" data-a="notasfinal">Revelar sus notas</button></div>`;
+  let fin="";
+  if(completo){
+    const premios=CRITERIOS.map(c=>{
+      const mejor=rank.map(t=>({t,v:t.por.find(p=>p.k===c.k).v})).filter(x=>x.v!=null).sort((a,b)=>b.v-a.v)[0];
+      return mejor?`<li><b>Mejor ${c.n.toLowerCase()}:</b> ${esc(mejor.t.nombre)} (${mejor.v.toFixed(1)})</li>`:""}).join("");
+    fin=`<h2 style="margin-top:28px">Clasificación final</h2><ol class="rank pop">${rank.map((t,i)=>`
+      <li class="fila quieta"><span class="pos">${i+1}</span>
+        <div>${i===0?'<span class="copa">Tapa ganadora</span>':''}<b>${esc(t.nombre)}</b><small>${esc(t.etiqueta)}, de ${esc(t.autor)}. Media ${t.total.toFixed(2)}</small></div>
+        <span class="tier" data-t="${tier(t.total)}">${tier(t.total)}</span></li>`).join("")}</ol>
+      <h2 style="margin-top:28px">Premios</h2><ul class="premios">${premios}</ul>`;
+  }
+  return `<h2>Resultados</h2>
+  <p class="prog">${completo?"La votación está cerrada. Esta es la clasificación final.":"Toca un plato para descubrir qué tapa era y después su nota. Las dos mejores se revelan juntas al final."}</p>
+  <ul class="rejilla">${grid}</ul>${acc}${fin}${completo?"":'<button class="sec chico" data-a="todo">Ver todo de golpe</button>'}`;
 }
 function pantallaAdmin(){
   return `<div class="barra"><button class="sec" data-a="volver">Volver</button></div>
   <h2>Panel del organizador</h2>
   <p class="prog">${votos.length} personas han votado algo. ${estado.closed?"La votación está cerrada y todos ven los resultados.":"La votación está abierta."}</p>
   ${estado.closed?"":'<p class="aviso">Al cerrar, todos verán solo los resultados y nadie podrá cambiar su voto.</p>'}
-  <div class="barra"><button class="${estado.closed?"pri":"peligro"}" data-a="cerrar">${estado.closed?"Reabrir la votación":"Cerrar votación y mostrar resultados"}</button></div>`;
+  <div class="barra"><button class="${estado.closed?"pri":"peligro"}" data-a="cerrar">${estado.closed?"Reabrir la votación":"Cerrar votación y mostrar resultados"}</button></div>
+  <div class="barra"><button class="sec" data-a="reiniciar">Reiniciar todos los votos</button></div>
+  <p class="prog">Reiniciar borra los votos de todos y reabre la votación. Cada móvil se queda limpio al instante.</p>`;
 }
 function pintar(){
   if(!uid)return;
@@ -239,7 +287,19 @@ document.addEventListener("click",e=>{
   else if(a==="adm"){
     if(admin||prompt("Clave del organizador")===CLAVE_ORGANIZADOR){admin=true;vista="admin";pintar();scrollTo(0,0)}
     else toast("Clave incorrecta")}
+  else if(a==="voltear"){
+    const d=datosRev(),id=b.dataset.id;
+    if(d.ids.has(id)){
+      if(d.pend===0&&rev.f===0){rev.f=1;marcar(d.fin.map(t=>t.id));guardarRev();pintar()}
+      else toast("Esa se guarda para el gran final. Revela antes las demás.");
+      return}
+    rev.e[id]=1;marcar([id]);guardarRev();pintar()}
+  else if(a==="nota"){rev.e[b.dataset.id]=2;marcar([b.dataset.id]);guardarRev();pintar()}
+  else if(a==="final"){const d=datosRev();rev.f=1;marcar(d.fin.map(t=>t.id));guardarRev();pintar()}
+  else if(a==="notasfinal"){const d=datosRev();rev.f=2;marcar(d.fin.map(t=>t.id));guardarRev();pintar()}
+  else if(a==="todo"){datosRev().rank.forEach(t=>rev.e[t.id]=2);rev.f=2;guardarRev();pintar()}
   else if(a==="cerrar")setDoc(doc(db,"config","estado"),{closed:!estado.closed},{merge:true});
+  else if(a==="reiniciar"){if(confirm("¿Borrar los votos de TODOS y empezar de cero?"))setDoc(doc(db,"config","estado"),{ronda:(estado.ronda||0)+1,closed:false},{merge:true}).then(()=>toast("Votos reiniciados"))}
 });
 document.addEventListener("input",e=>{
   const el=e.target;
