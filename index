@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Concurso de tapas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--azul:#12306b;--azul2:#1d4592;--hueso:#f6f7fb;--azafran:#f4b400;--chile:#d7263d;--tinta:#0e1b3a;--gris:#6b7592;--borde:#d9deec;color-scheme:light}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:"Bricolage Grotesque",system-ui,sans-serif;background:var(--hueso);color:var(--tinta);min-height:100vh;font-size:17px;line-height:1.4}
+header{background-color:#fff;background-image:radial-gradient(circle at 0 0,transparent 0 9px,var(--azul2) 10px 12px,transparent 13px),radial-gradient(circle at 100% 100%,transparent 0 9px,var(--azul2) 10px 12px,transparent 13px);background-size:28px 28px;border-bottom:4px solid var(--azul);padding:22px 18px}
+header h1{margin:0;font-size:2.1rem;font-weight:800;letter-spacing:-.02em;color:var(--azul);background:#fff;display:inline-block;padding:2px 12px;border-radius:4px}
+main{max-width:640px;margin:0 auto;padding:18px}
+button{font:inherit;cursor:pointer;border:0;border-radius:10px;padding:12px 16px;font-weight:600}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--azafran);outline-offset:2px}
+.pri{background:var(--azul);color:#fff}
+.sec{background:#fff;color:var(--azul);border:2px solid var(--azul)}
+.peligro{background:var(--chile);color:#fff}
+.barra{display:flex;gap:10px;margin:0 0 16px}
+.barra button{flex:1}
+.prog{margin:0 0 14px;color:var(--gris)}
+.rejilla{display:grid;grid-template-columns:1fr 1fr;gap:12px;list-style:none;padding:0;margin:0}
+.tapa{width:100%;text-align:left;background:#fff;border:2px solid var(--borde);min-height:104px;display:flex;flex-direction:column;justify-content:space-between;padding:14px}
+.tapa b{font-size:1.15rem}
+.tapa.ok{border-color:var(--azul);background:#eef3ff}
+.tapa small{color:var(--gris)}
+.tapa.ok small{color:var(--azul);font-weight:600}
+h2{font-size:1.6rem;margin:6px 0 4px;letter-spacing:-.01em}
+.crit{background:#fff;border:2px solid var(--borde);border-radius:14px;padding:12px 14px;margin:0 0 12px}
+.crit .fila-c{display:flex;justify-content:space-between;align-items:baseline}
+.crit label{font-weight:600}
+.crit output{font-size:2.4rem;font-weight:800;color:var(--azul);min-width:3ch;text-align:right}
+.crit.sin output{color:var(--borde)}
+input[type=range]{width:100%;height:38px;background:transparent;-webkit-appearance:none;appearance:none}
+input[type=range]::-webkit-slider-runnable-track{height:10px;border-radius:6px;background:linear-gradient(90deg,var(--azul2),var(--azafran))}
+input[type=range]::-moz-range-track{height:10px;border-radius:6px;background:linear-gradient(90deg,var(--azul2),var(--azafran))}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:32px;height:32px;margin-top:-11px;border-radius:50%;background:#fff;border:4px solid var(--azul)}
+input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;background:#fff;border:4px solid var(--azul)}
+.crit.sin input[type=range]::-webkit-slider-thumb{border-color:var(--gris)}
+textarea,input[type=password]{width:100%;font:inherit;padding:12px;border:2px solid var(--borde);border-radius:10px;background:#fff}
+textarea{min-height:78px;resize:vertical}
+.aviso{background:#fff7dc;border:2px solid var(--azafran);border-radius:10px;padding:10px 12px;margin:0 0 12px}
+.err{color:var(--chile);font-weight:600}
+#gate{max-width:360px;margin:40px auto;display:grid;gap:12px}
+.toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:var(--tinta);color:#fff;padding:8px 16px;border-radius:20px;font-size:.95rem;opacity:0;transition:opacity .25s;pointer-events:none}
+.toast.on{opacity:1}
+ol.rank{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+.fila{display:grid;grid-template-columns:36px 1fr auto;gap:12px;align-items:center;background:#fff;border:2px solid var(--borde);border-radius:14px;padding:12px;animation:sube .6s both;animation-delay:var(--d,0s)}
+.fila:first-child{border-color:var(--azafran);border-width:3px}
+.pos{font-size:1.6rem;font-weight:800;color:var(--azul)}
+.fila small{color:var(--gris);display:block}
+.tier{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:1.5rem;background:var(--gris);color:#fff}
+.tier[data-t="S+"]{background:var(--azafran);color:var(--tinta)}
+.tier[data-t="S"]{background:var(--chile)}
+.tier[data-t="A"]{background:var(--azul)}
+.tier[data-t="B"]{background:var(--azul2)}
+.nota{grid-column:2/4;font-weight:600}
+.mini{grid-column:2/4;display:grid;grid-template-columns:auto 1fr auto;gap:2px 8px;font-size:.88rem;align-items:center}
+.mini i{display:block;height:6px;border-radius:3px;background:var(--borde);position:relative;overflow:hidden}
+.mini i::after{content:"";position:absolute;inset:0 auto 0 0;width:var(--w);background:var(--azul2)}
+.coment{grid-column:2/4;color:var(--gris);font-size:.9rem;border-left:3px solid var(--borde);padding-left:8px}
+.premios{margin:24px 0 0;padding:0;list-style:none;display:grid;gap:8px}
+.premios li{background:#fff;border:2px dashed var(--azul2);border-radius:10px;padding:8px 12px}
+@keyframes sube{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.fila{animation:none}.toast{transition:none}}
+</style>
+</head>
+<body>
+<header><h1>Concurso de tapas</h1></header>
+<main id="app"></main>
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {getAuth,signInAnonymously,onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {getFirestore,doc,setDoc,onSnapshot,collection} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+/* ============ LO ÚNICO QUE TIENES QUE CAMBIAR ============ */
+const CONFIG = {            // lo copias de Firebase (paso 3 de la guía)
+  apiKey:"AIzaSyAjJ8kHKuEfqCAWLx3L3iCLBfhKRHvOfag", authDomain:"tapas-eff9e.firebaseapp.com", projectId:"tapas-eff9e",
+  storageBucket:"tapas-eff9e.firebasestorage.app", messagingSenderId:"856788556147", appId:"1:856788556147:web:26f59f1007a9fdf1e94d06"
+};
+const CLAVE = "tapa";            // contraseña para entrar a votar
+const CLAVE_ORGANIZADOR = "chef";     // contraseña del organizador (cámbiala)
+const TAPAS = [                       // añade, quita o cambia las que quieras
+  {id:"t1", etiqueta:"Tapa de persona 1", nombre:"Nombre real de la tapa", autor:"Quién la hizo"},
+  {id:"t2", etiqueta:"Tapa de persona 2", nombre:"Nombre real de la tapa", autor:"Quién la hizo"},
+  {id:"t3", etiqueta:"Tapa de persona 3", nombre:"Nombre real de la tapa", autor:"Quién la hizo"},
+  {id:"t4", etiqueta:"Tapa de persona 4", nombre:"Nombre real de la tapa", autor:"Quién la hizo"},
+  {id:"t5", etiqueta:"Tapa de persona 5", nombre:"Nombre real de la tapa", autor:"Quién la hizo"},
+  {id:"t6", etiqueta:"Tapa de persona 6", nombre:"Nombre real de la tapa", autor:"Quién la hizo"},
+  {id:"t7", etiqueta:"Tapa de persona 7", nombre:"Nombre real de la tapa", autor:"Quién la hizo"},
+  {id:"t8", etiqueta:"Tapa de persona 8", nombre:"Nombre real de la tapa", autor:"Quién la hizo"}
+];
+const CRITERIOS = [
+  {k:"sabor",n:"Sabor"},{k:"originalidad",n:"Originalidad"},
+  {k:"presentacion",n:"Presentación"},{k:"elaboracion",n:"Elaboración"}
+];
+/* ======================================================== */
+
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmt=n=>Number.isInteger(n)?String(n):n.toFixed(1);
+const tier=n=>n>=9?"S+":n>=8?"S":n>=7?"A":n>=6?"B":"C";
+let db,uid,mine={r:{},c:{}},estado={},votos=[],vista="lista",actual=null,admin=false,timer;
+
+function toast(m){const e=$("#toast");e.textContent=m;e.classList.add("on");clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove("on"),1400)}
+const completa=id=>CRITERIOS.every(c=>mine.r[id]?.[c.k]!=null);
+const media=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:null;
+
+/* ---------- Entrada con contraseña ---------- */
+function puerta(){
+  $("#app").innerHTML=`<form id="gate"><h2>¿Cuál es la clave?</h2>
+  <input type="password" id="pw" placeholder="Contraseña" autocomplete="off" autofocus>
+  <button class="pri">Entrar</button><p class="err" id="e"></p></form>`;
+  $("#gate").onsubmit=e=>{e.preventDefault();
+    if($("#pw").value===CLAVE){localStorage.setItem("tapas-ok","1");arrancar()}
+    else $("#e").textContent="Esa no es la clave. Pregúntasela al organizador."};
+}
+
+/* ---------- Firebase ---------- */
+async function arrancar(){
+  $("#app").innerHTML="<p class='prog'>Conectando…</p>";
+  const app=initializeApp(CONFIG),auth=getAuth(app);db=getFirestore(app);
+  onAuthStateChanged(auth,u=>{if(u&&!uid){uid=u.uid;escuchar()}});
+  try{await signInAnonymously(auth)}
+  catch(e){$("#app").innerHTML="<p class='err'>No se pudo conectar. Revisa la configuración de Firebase y que el acceso anónimo esté activado.</p>"}
+}
+function escuchar(){
+  onSnapshot(doc(db,"votes",uid),s=>{
+    if(vista==="detalle")return;
+    if(s.exists()){const d=s.data();mine={r:d.r||{},c:d.c||{}}}
+    pintar()});
+  onSnapshot(doc(db,"config","estado"),s=>{estado=s.exists()?s.data():{};if(vista!=="detalle")pintar()});
+  onSnapshot(collection(db,"votes"),s=>{votos=s.docs.map(d=>d.data());if(vista==="resultados"||vista==="admin")pintar()});
+  pintar();
+}
+function guardar(){
+  clearTimeout(timer);
+  timer=setTimeout(()=>setDoc(doc(db,"votes",uid),{r:mine.r,c:mine.c},{merge:true})
+    .then(()=>toast("Guardado")).catch(()=>toast("No se pudo guardar")),350);
+}
+
+/* ---------- Pantallas ---------- */
+function pantallaLista(){
+  const hechas=TAPAS.filter(t=>completa(t.id)).length;
+  return `<div class="barra"><button class="sec" data-a="res">Resultados</button><button class="sec" data-a="adm">Organizador</button></div>
+  ${estado.closed?'<p class="aviso">La votación está cerrada. Ya no se pueden cambiar los votos.</p>':''}
+  <p class="prog">Has votado ${hechas} de ${TAPAS.length} tapas. Toca una para puntuarla; puedes volver a cambiarla cuando quieras.</p>
+  <ul class="rejilla">${TAPAS.map(t=>{
+    const ok=completa(t.id),vals=CRITERIOS.map(c=>mine.r[t.id]?.[c.k]).filter(v=>v!=null);
+    const txt=ok?"Tu nota: "+fmt(media(vals)):vals.length?"A medias":"Sin votar";
+    return `<li><button class="tapa ${ok?"ok":""}" data-a="abrir" data-id="${t.id}"><b>${esc(t.etiqueta)}</b><small>${txt}</small></button></li>`}).join("")}</ul>`;
+}
+function pantallaDetalle(){
+  const t=TAPAS.find(x=>x.id===actual),r=mine.r[actual]||{},cerrada=!!estado.closed;
+  return `<div class="barra"><button class="sec" data-a="volver">Volver a las tapas</button></div>
+  <h2>${esc(t.etiqueta)}</h2>
+  ${cerrada?'<p class="aviso">La votación está cerrada.</p>':'<p class="prog">Mueve cada barra de 0 a 10. Se guarda sola.</p>'}
+  ${CRITERIOS.map(c=>{const v=r[c.k];return `<div class="crit ${v==null?"sin":""}" id="c-${c.k}">
+    <div class="fila-c"><label for="s-${c.k}">${c.n}</label><output>${v==null?"–":fmt(v)}</output></div>
+    <input type="range" id="s-${c.k}" data-k="${c.k}" min="0" max="10" step="0.5" value="${v??5}" ${cerrada?"disabled":""}></div>`}).join("")}
+  <label for="com" class="prog">Comentario (opcional, anónimo)</label>
+  <textarea id="com" ${cerrada?"disabled":""}>${esc(mine.c[actual]||"")}</textarea>`;
+}
+function calcular(){
+  return TAPAS.map(t=>{
+    const por=CRITERIOS.map(c=>({...c,v:media(votos.map(x=>x.r?.[t.id]?.[c.k]).filter(v=>v!=null))}));
+    const total=media(por.map(p=>p.v).filter(v=>v!=null));
+    const coms=votos.map(x=>x.c?.[t.id]).filter(Boolean);
+    return {...t,por,total,coms};
+  }).filter(t=>t.total!=null).sort((a,b)=>b.total-a.total);
+}
+function pantallaResultados(){
+  const volver=`<div class="barra"><button class="sec" data-a="volver">Volver</button></div>`;
+  if(!estado.revealed)return volver+`<h2>Todavía es un secreto</h2><p class="prog">Los resultados aparecen cuando el organizador los revele. ${votos.length} personas ya han votado algo.</p>`;
+  const rank=calcular();
+  if(!rank.length)return volver+"<p class='prog'>Aún no hay votos.</p>";
+  const n=rank.length;
+  const premios=CRITERIOS.map(c=>{
+    const mejor=rank.map(t=>({t,v:t.por.find(p=>p.k===c.k).v})).filter(x=>x.v!=null).sort((a,b)=>b.v-a.v)[0];
+    return mejor?`<li><b>Mejor ${c.n.toLowerCase()}:</b> ${esc(mejor.t.nombre)} (${fmt(+mejor.v.toFixed(1))})</li>`:""}).join("");
+  return volver+`<h2>Y los ganadores son…</h2><ol class="rank">${rank.map((t,i)=>`
+    <li class="fila" style="--d:${((n-1-i)*0.7).toFixed(1)}s"><span class="pos">${i+1}</span>
+      <div><b>${esc(t.nombre)}</b><small>${esc(t.etiqueta)}, de ${esc(t.autor)}</small></div>
+      <span class="tier" data-t="${tier(t.total)}">${tier(t.total)}</span>
+      <span class="nota">Nota media: ${t.total.toFixed(2)}</span>
+      <div class="mini">${t.por.map(p=>p.v==null?"":`<span>${p.n}</span><i style="--w:${p.v*10}%"></i><span>${p.v.toFixed(1)}</span>`).join("")}</div>
+      ${t.coms.map(c=>`<div class="coment">${esc(c)}</div>`).join("")}</li>`).join("")}</ol>
+    <h2 style="margin-top:28px">Premios</h2><ul class="premios">${premios}</ul>`;
+}
+function pantallaAdmin(){
+  return `<div class="barra"><button class="sec" data-a="volver">Volver</button></div>
+  <h2>Panel del organizador</h2>
+  <p class="prog">${votos.length} personas han votado algo.</p>
+  <div class="barra"><button class="${estado.closed?"pri":"peligro"}" data-a="cerrar">${estado.closed?"Reabrir la votación":"Cerrar la votación"}</button></div>
+  <div class="barra"><button class="${estado.revealed?"sec":"pri"}" data-a="revelar">${estado.revealed?"Volver a ocultar resultados":"Revelar resultados"}</button></div>`;
+}
+function pintar(){
+  if(!uid)return;
+  const f={lista:pantallaLista,detalle:pantallaDetalle,resultados:pantallaResultados,admin:pantallaAdmin}[vista];
+  $("#app").innerHTML=f();window.scrollTo(0,0);
+}
+
+/* ---------- Eventos ---------- */
+document.addEventListener("click",e=>{
+  const b=e.target.closest("[data-a]");if(!b)return;
+  const a=b.dataset.a;
+  if(a==="abrir"){actual=b.dataset.id;vista="detalle";pintar()}
+  else if(a==="volver"){vista="lista";pintar()}
+  else if(a==="res"){vista="resultados";pintar()}
+  else if(a==="adm"){
+    if(admin||prompt("Clave del organizador")===CLAVE_ORGANIZADOR){admin=true;vista="admin";pintar()}
+    else toast("Clave incorrecta")}
+  else if(a==="cerrar")setDoc(doc(db,"config","estado"),{closed:!estado.closed},{merge:true});
+  else if(a==="revelar")setDoc(doc(db,"config","estado"),{revealed:!estado.revealed},{merge:true});
+});
+document.addEventListener("input",e=>{
+  const el=e.target;
+  if(vista!=="detalle")return;
+  if(el.matches("input[type=range]")){
+    const k=el.dataset.k,v=parseFloat(el.value);
+    (mine.r[actual]??={})[k]=v;
+    const box=$("#c-"+k);box.classList.remove("sin");box.querySelector("output").textContent=fmt(v);
+    guardar();
+  }else if(el.id==="com"){mine.c[actual]=el.value;guardar()}
+});
+
+localStorage.getItem("tapas-ok")==="1"?arrancar():puerta();
+</script>
+</body>
+</html>
