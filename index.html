@@ -122,15 +122,12 @@ const CONFIG = {
 };
 const CLAVE = "tapa";                 // contraseña para entrar a votar
 const CLAVE_ORGANIZADOR = "chef";     // contraseña del organizador (cámbiala)
-const TAPAS = [                       // añade, quita o cambia las que quieras
-  {id:"t1", etiqueta:"Tapa de persona 1", nombre:"Nombre real de la tapa", autor:"Quién la hizo"},
-  {id:"t2", etiqueta:"Tapa de persona 2", nombre:"Nombre real de la tapa", autor:"Quién la hizo"},
-  {id:"t3", etiqueta:"Tapa de persona 3", nombre:"Nombre real de la tapa", autor:"Quién la hizo"},
-  {id:"t4", etiqueta:"Tapa de persona 4", nombre:"Nombre real de la tapa", autor:"Quién la hizo"},
-  {id:"t5", etiqueta:"Tapa de persona 5", nombre:"Nombre real de la tapa", autor:"Quién la hizo"},
-  {id:"t6", etiqueta:"Tapa de persona 6", nombre:"Nombre real de la tapa", autor:"Quién la hizo"},
-  {id:"t7", etiqueta:"Tapa de persona 7", nombre:"Nombre real de la tapa", autor:"Quién la hizo"},
-  {id:"t8", etiqueta:"Tapa de persona 8", nombre:"Nombre real de la tapa", autor:"Quién la hizo"}
+const TAPAS = [                       // el orden es el número de cada tapa (Tapa 1, Tapa 2...)
+  {id:"t1", etiqueta:"Tapa 1", nombre:"", autor:"Lara"},
+  {id:"t2", etiqueta:"Tapa 2", nombre:"", autor:"Kk"},
+  {id:"t3", etiqueta:"Tapa 3", nombre:"", autor:"Hicham y Jeza"},
+  {id:"t4", etiqueta:"Tapa 4", nombre:"", autor:"Ferran y Alex"},
+  {id:"t5", etiqueta:"Tapa 5", nombre:"", autor:"Iker y Ana"}
 ];
 const CRITERIOS = [
   {k:"sabor",n:"Sabor"},{k:"originalidad",n:"Originalidad"},
@@ -140,6 +137,7 @@ const CRITERIOS = [
 
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const nom=t=>t.nombre||"Tapa de "+t.autor;
 const fmt=n=>Number.isInteger(n)?String(n):n.toFixed(1);
 const tier=n=>n>=9.999?"S++":n>=9.5?"S+":n>=9?"S":n>=8?"A":n>=7?"B":n>=6?"C":n>=5?"D":n>=4?"E":"F";
 let rev={e:{},f:0},revRonda=null,nuevos=new Set();
@@ -241,7 +239,7 @@ function pantallaResultados(){
       :`<div class="veredicto"><span class="tier" data-t="${tier(x.total)}">${tier(x.total)}</span><span class="nm">Nota media ${x.total.toFixed(2)}</span></div>
         <div class="mini">${x.por.map(p=>p.v==null?"":`<span>${p.n}</span><i style="--w:${p.v*10}%"></i><span>${p.v.toFixed(1)}</span>`).join("")}</div>
         ${x.coms.map(c=>`<div class="coment">${esc(c)}</div>`).join("")}`;
-    return `<li class="abierta${nuevos.has(t.id)?" pop":""}"><div class="carta"><small>${esc(t.etiqueta)}</small><b class="nom">${esc(x.nombre)}</b><span class="aut">de ${esc(x.autor)}</span>${detalle}</div></li>`}).join("");
+    return `<li class="abierta${nuevos.has(t.id)?" pop":""}"><div class="carta"><small>${esc(t.etiqueta)}</small><b class="nom">${esc(nom(x))}</b><span class="aut">de ${esc(x.autor)}</span>${detalle}</div></li>`}).join("");
   let acc="";
   if(rev.f===0&&pend>0)acc=`<p class="prog" style="text-align:center">Quedan ${pend} por revelar antes del gran final.</p>`;
   else if(rev.f===0)acc=`<div class="finalbox"><p class="prog">Solo quedan las dos mejores. ¿Listos?</p><button class="pri" data-a="final">Revelar las dos mejores a la vez</button></div>`;
@@ -250,10 +248,10 @@ function pantallaResultados(){
   if(completo){
     const premios=CRITERIOS.map(c=>{
       const mejor=rank.map(t=>({t,v:t.por.find(p=>p.k===c.k).v})).filter(x=>x.v!=null).sort((a,b)=>b.v-a.v)[0];
-      return mejor?`<li><b>Mejor ${c.n.toLowerCase()}:</b> ${esc(mejor.t.nombre)} (${mejor.v.toFixed(1)})</li>`:""}).join("");
+      return mejor?`<li><b>Mejor ${c.n.toLowerCase()}:</b> ${esc(nom(mejor.t))} (${mejor.v.toFixed(1)})</li>`:""}).join("");
     fin=`<h2 style="margin-top:28px">Clasificación final</h2><ol class="rank pop">${rank.map((t,i)=>`
       <li class="fila quieta"><span class="pos">${i+1}</span>
-        <div>${i===0?'<span class="copa">Tapa ganadora</span>':''}<b>${esc(t.nombre)}</b><small>${esc(t.etiqueta)}, de ${esc(t.autor)}. Media ${t.total.toFixed(2)}</small></div>
+        <div>${i===0?'<span class="copa">Tapa ganadora</span>':''}<b>${esc(nom(t))}</b><small>${esc(t.etiqueta)}, de ${esc(t.autor)}. Media ${t.total.toFixed(2)}</small></div>
         <span class="tier" data-t="${tier(t.total)}">${tier(t.total)}</span></li>`).join("")}</ol>
       <h2 style="margin-top:28px">Premios</h2><ul class="premios">${premios}</ul>`;
   }
