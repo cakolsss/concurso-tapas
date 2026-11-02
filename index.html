@@ -49,7 +49,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:38px;heigh
 input[type=range]::-moz-range-thumb{width:38px;height:38px;border:0;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%23fffaf0' stroke='%23ffb627' stroke-width='2'/%3E%3Ccircle cx='16' cy='16' r='8' fill='none' stroke='%23d6ccb0' stroke-width='2'/%3E%3C/svg%3E") center/cover}
 .crit.sin input[type=range]::-webkit-slider-thumb{opacity:.55}
 .crit.sin input[type=range]::-moz-range-thumb{opacity:.55}
-textarea,input[type=password]{width:100%;font:inherit;color:var(--texto);padding:12px;border:2px solid var(--linea);border-radius:12px;background:#0a201e}
+textarea,input[type=password],input[type=text],select{width:100%;font:inherit;color:var(--texto);padding:12px;border:2px solid var(--linea);border-radius:12px;background:#0a201e}
 textarea{min-height:78px;resize:vertical}
 .aviso{background:rgba(255,182,39,.12);border:1px solid var(--azafran);border-radius:12px;padding:10px 12px;margin:0 0 14px}
 .err{color:var(--chile);font-weight:700}
@@ -79,6 +79,24 @@ ol.rank{list-style:none;margin:0;padding:0;display:grid;gap:12px}
 .coment{grid-column:2/4;color:var(--suave);font-size:.9rem;border-left:3px solid var(--linea);padding-left:8px}
 .premios{margin:0;padding:0;list-style:none;display:grid;gap:8px}
 .premios li{background:var(--fondo2);border:1px dashed var(--azafran);border-radius:12px;padding:8px 12px}
+.mute{margin-left:auto;background:transparent;color:var(--texto);padding:6px 10px;font-size:1.2rem;border:1px solid var(--linea)}
+#cf{position:fixed;inset:0;pointer-events:none;z-index:70}
+.splash,.cuenta{position:fixed;inset:0;display:grid;place-content:center;justify-items:center;gap:12px;background:var(--fondo);z-index:60;font-family:Unbounded,sans-serif}
+.splash{font-size:1.6rem;font-weight:800;animation:fundido 1.5s both}
+.splash svg{animation:bote .6s ease-out}
+.cuenta{background:rgba(14,42,39,.94)}
+.cuenta b{font-size:9rem;color:var(--azafran);animation:golpe 1s both}
+.cuenta b.ya{font-size:3rem}
+.opcs{display:flex;gap:10px;margin-top:8px}
+.opc{flex:1;background:transparent;color:var(--texto);border:2px solid var(--linea)}
+.opc.on{background:var(--azafran);color:var(--fondo);border-color:var(--azafran)}
+.quin{display:grid;grid-template-columns:auto 1fr;gap:8px 10px;align-items:center;margin-top:8px}
+.lleno{animation:lleno .7s}
+.propia{opacity:.55;cursor:default}
+@keyframes fundido{0%{opacity:0}15%,85%{opacity:1}100%{opacity:0}}
+@keyframes bote{from{transform:translateY(-60px) scale(.6)}to{transform:none}}
+@keyframes golpe{from{transform:scale(2);opacity:0}30%{opacity:1}to{transform:scale(.9);opacity:.6}}
+@keyframes lleno{40%{transform:scale(1.15);box-shadow:0 0 0 8px rgba(255,182,39,.35)}}
 .plato b.dos{font-size:1.45rem}
 .chip{display:inline-block;background:var(--fondo);border:1px solid var(--linea);border-radius:20px;padding:1px 10px;font-weight:700;color:var(--azafran);font-size:.9rem}
 .extra{display:grid;gap:4px;width:100%;color:var(--suave);text-align:left;font-size:.95rem}
@@ -99,7 +117,7 @@ ol.rank{list-style:none;margin:0;padding:0;display:grid;gap:12px}
 @keyframes pop{from{opacity:0;transform:scale(.9) translateY(10px)}to{opacity:1;transform:none}}
 @keyframes late{50%{transform:scale(1.06)}}
 @keyframes sube{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
-@media (prefers-reduced-motion:reduce){.fila,.pop .carta,.rank.pop,.tapa.listo .plato{animation:none}.toast,.tapa{transition:none}}
+@media (prefers-reduced-motion:reduce){.fila,.pop .carta,.rank.pop,.tapa.listo .plato,.splash,.cuenta b,.lleno{animation:none}.toast,.tapa{transition:none}}
 </style>
 </head>
 <body>
@@ -108,10 +126,12 @@ ol.rank{list-style:none;margin:0;padding:0;display:grid;gap:12px}
   <div class="marca">
     <svg viewBox="0 0 64 64" width="56" height="56" aria-hidden="true"><g fill="#f6f1e3"><circle cx="20" cy="26" r="12"/><circle cx="32" cy="19" r="13"/><circle cx="44" cy="26" r="12"/><rect x="16" y="30" width="32" height="20" rx="3"/></g><rect x="16" y="45" width="32" height="9" rx="2" fill="#ffb627"/></svg>
     <div><span class="ed">II Edición</span><h1>MasChefFriends</h1></div>
+    <button class="mute" data-a="mute" aria-label="Sonido">🔊</button>
   </div>
 </header>
 <main id="app"></main>
 <button class="adm" data-a="adm" aria-label="Organizador" title="Organizador"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7z"/></svg></button>
+<canvas id="cf"></canvas><div id="ov"></div>
 <div class="toast" id="toast"></div>
 
 <script type="module">
@@ -126,7 +146,6 @@ const CONFIG = {
 };
 const CLAVE = "tapa";                 // contraseña para entrar a votar
 const CLAVE_ORGANIZADOR = "chef";     // contraseña del organizador (cámbiala)
-// Opcional por tapa: nombre:"Huevo trampantojo" y ingredientes:["huevo|yema","seta|champiñon","cecina"] (alternativas con |)
 const TAPAS = [                       // "nombre" es opcional: si lo rellenas, sale en los resultados
   {id:"t1", etiqueta:"Tapa de Lara", nombre:"", autor:"Lara"},
   {id:"t2", etiqueta:"Tapa de Kk", nombre:"", autor:"Kk"},
@@ -145,13 +164,18 @@ const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&
 const nom=t=>t.nombre||t.etiqueta;
 const eur=v=>v>=10?"10+ €":v.toFixed(2).replace(".",",")+" €";
 const inic=a=>a.split(/\s+y\s+/i).map(x=>x.trim()[0]||"").join(" & ");
-const lista=t=>String(t||"").split(/[,;\n]|\s+y\s+/i).map(x=>x.trim()).filter(x=>x.length>1);
 const norm=s=>String(s).normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
-const aciertos=(txt,ings)=>ings.filter(g=>g.split("|").some(a=>norm(txt).includes(norm(a.trim())))).length;
+const col=s=>norm(s).replace(/[^a-z0-9]/g,"").replace(/(.)\1+/g,"$1");
+const dist=(a,b)=>{const d=Array.from({length:a.length+1},(_,i)=>[i,...Array(b.length).fill(0)]);for(let j=1;j<=b.length;j++)d[0][j]=j;for(let i=1;i<=a.length;i++)for(let j=1;j<=b.length;j++)d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1));return d[a.length][b.length]};
+function buscarYo(txt){
+  const ks=norm(txt).split(/\s+y\s+|[\s,&+]+/).map(col).filter(Boolean);
+  if(!ks.length)return null;
+  return TAPAS.find(t=>t.autor.split(/\s+y\s+/i).map(col).some(n=>ks.some(k=>k===n||(n.length>3&&k.length>3&&dist(k,n)<=1))))?.id||null;
+}
 const fmt=n=>Number.isInteger(n)?String(n):n.toFixed(1);
 const tier=n=>n>=9.999?"S++":n>=9.5?"S+":n>=9?"S":n>=8?"A":n>=7?"B":n>=6?"C":n>=5?"D":n>=4?"E":"F";
 let rev={e:{},f:0},revRonda=null,nuevos=new Set();
-let db,uid,mine={r:{},c:{},p:{},i:{}},raw=null,todos=[],ronda=null,estado={},votos=[],vista="lista",actual=null,admin=false,timer,animado=false;
+let db,uid,mine={r:{},c:{},p:{},i:{}},raw=null,todos=[],ronda=null,estado={},votos=[],vista="lista",actual=null,admin=false,timer,animado=false,yo=localStorage.getItem("tapas-yo"),qs=[],qlocal=null,resPrev=null,tTick=0,ac=null,mudo=localStorage.getItem("tapas-mudo")==="1";
 
 function toast(m){const e=$("#toast");e.textContent=m;e.classList.add("on");clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove("on"),1400)}
 const completa=id=>CRITERIOS.every(c=>mine.r[id]?.[c.k]!=null);
@@ -177,7 +201,7 @@ async function arrancar(){
 }
 function sinc(forzar){
   votos=todos.filter(x=>(x.ronda||0)===(estado.ronda||0));
-  if(vista!=="detalle"||forzar)mine=raw&&(raw.ronda||0)===(estado.ronda||0)?{r:raw.r||{},c:raw.c||{},p:raw.p||{},i:raw.i||{}}:{r:{},c:{},p:{},i:{}};
+  if(vista!=="detalle"||forzar)mine=raw&&(raw.ronda||0)===(estado.ronda||0)?{r:raw.r||{},c:raw.c||{},p:raw.p||{},i:raw.i||{},rp:raw.rp||{}}:{r:{},c:{},p:{},i:{},rp:{}};
 }
 function escuchar(){
   onSnapshot(doc(db,"votes",uid),s=>{raw=s.exists()?s.data():null;sinc();if(vista!=="detalle")pintar()});
@@ -185,29 +209,38 @@ function escuchar(){
     estado=s.exists()?s.data():{};
     if(!estado.closed){animado=false;revRonda=null;try{localStorage.removeItem("tapas-rev-"+(estado.ronda||0))}catch(_){}}
     const r=estado.ronda||0,nueva=ronda!==null&&r!==ronda;ronda=r;
-    if(nueva){clearTimeout(timer);if(vista==="detalle")vista="lista";animado=false}
+    if(nueva){clearTimeout(timer);if(vista==="detalle")vista="lista";animado=false;qlocal=null}
     sinc(nueva);
+    const res=!!estado.resultados;if(resPrev===false&&res)cuentaAtras();resPrev=res;
     if(estado.closed||vista!=="detalle")pintar()});
   onSnapshot(collection(db,"votes"),s=>{todos=s.docs.map(d=>d.data());sinc();if(vista==="resultados"||vista==="admin")pintar()});
+  onSnapshot(collection(db,"config"),s=>{
+    qs=s.docs.filter(d=>d.id.startsWith("q_")).map(d=>d.data()).filter(x=>(x.ronda||0)===(estado.ronda||0));
+    if(!qlocal){const m=qs.find(x=>x.yo===yo);if(m)qlocal={auto:m.auto,podio:[...m.podio]}}
+    if(vista==="admin"||vista==="resultados")pintar()});
   pintar();
 }
 function guardar(){
   clearTimeout(timer);
-  timer=setTimeout(()=>setDoc(doc(db,"votes",uid),{r:mine.r,c:mine.c,p:mine.p,i:mine.i,ronda:estado.ronda||0})
+  timer=setTimeout(()=>setDoc(doc(db,"votes",uid),{r:mine.r,c:mine.c,p:mine.p,i:mine.i,rp:mine.rp,ronda:estado.ronda||0})
     .then(()=>toast("Guardado")).catch(()=>toast("No se pudo guardar")),350);
 }
 
 /* ---------- Pantallas ---------- */
 function pantallaLista(){
-  const hechas=TAPAS.filter(t=>completa(t.id)).length;
+  const otras=TAPAS.filter(t=>t.id!==yo),hechas=otras.filter(t=>completa(t.id)).length,mi=TAPAS.find(t=>t.id===yo);
+  const cls=a=>inic(a).length<2?"":"dos";
   return `<h2>Puntúa cada tapa</h2>
-  <p class="prog">Has votado ${hechas} de ${TAPAS.length}. Toca un plato para puntuarlo; puedes volver y cambiar tu nota mientras la votación siga abierta.</p>
-  <ul class="rejilla">${TAPAS.map((t,i)=>{
+  <p class="prog">Has votado ${hechas} de ${otras.length}. Toca un plato para puntuarlo; puedes volver y cambiar tu nota mientras la votación siga abierta.</p>
+  <ul class="rejilla">${TAPAS.map(t=>{
+    if(t.id===yo)return `<li><div class="tapa propia"><span class="plato"><b class="${cls(t.autor)}">${esc(inic(t.autor))}</b><small>tu tapa</small></span><span class="cap">${esc(t.etiqueta)}</span></div></li>`;
     const ok=completa(t.id),vals=CRITERIOS.map(c=>mine.r[t.id]?.[c.k]).filter(v=>v!=null);
-    return `<li><button class="tapa ${ok?"ok":""}" data-a="abrir" data-id="${t.id}"><span class="plato"><b class="${ok||inic(t.autor).length<2?"":"dos"}">${ok?fmt(media(vals)):esc(inic(t.autor))}</b><small>${ok?"tu nota":vals.length?"a medias":"sin votar"}</small></span><span class="cap">${esc(t.etiqueta)}</span></button></li>`}).join("")}</ul>`;
+    return `<li><button class="tapa ${ok?"ok":""}" data-a="abrir" data-id="${t.id}"><span class="plato"><b class="${ok?"":cls(t.autor)}">${ok?fmt(media(vals)):esc(inic(t.autor))}</b><small>${ok?"tu nota":vals.length?"a medias":"sin votar"}</small></span><span class="cap">${esc(t.etiqueta)}</span></button></li>`}).join("")}</ul>
+  <button class="sec chico" data-a="quien">Entras como ${esc(mi?.autor||"")}. ¿No eres tú? Cambiar</button>`;
 }
 function pantallaDetalle(){
-  const i=TAPAS.findIndex(x=>x.id===actual),t=TAPAS[i],r=mine.r[actual]||{},pr=mine.p?.[actual],ing=mine.i?.[actual]||"";
+  const i=TAPAS.findIndex(x=>x.id===actual),t=TAPAS[i],r=mine.r[actual]||{},pr=mine.p?.[actual],rp=mine.rp?.[actual],ig=mine.i?.[actual];
+  const opc=(a,v)=>`<div class="opcs"><button class="opc ${v===1?"on":""}" data-a="${a}" data-v="1">Sí</button><button class="opc ${v===0?"on":""}" data-a="${a}" data-v="0">No</button></div>`;
   return `<div class="barra"><button class="sec" data-a="volver">Volver a las tapas</button></div>
   <span class="plato grande"><b class="${inic(t.autor).length<2?"":"dos"}">${esc(inic(t.autor))}</b><small>tapa</small></span>
   <h2 style="text-align:center">${esc(t.etiqueta)}</h2>
@@ -218,25 +251,23 @@ function pantallaDetalle(){
   <div class="crit ${pr==null?"sin":""}" id="c-precio">
     <div class="fila-c"><label for="pr">¿Cuánto pagarías por esta tapa?</label><output>${pr==null?"–":eur(pr)}</output></div>
     <input type="range" id="pr" min="0" max="10" step="0.5" value="${pr??3}"></div>
-  <div class="crit">
-    <label for="ing">¿Eres capaz de decir todos sus ingredientes?</label>
-    <p class="prog" style="margin:4px 0 8px">Escríbelos separados por comas. <span class="chip" id="ni">${lista(ing).length} detectados</span></p>
-    <textarea id="ing" placeholder="huevo, seta, ...">${esc(ing)}</textarea></div>
+  <div class="crit"><label>¿La repetirías?</label>${opc("rep",rp)}</div>
+  <div class="crit"><label>¿Eres capaz de decir todos sus ingredientes?</label>${opc("ing",ig)}</div>
   <label for="com" class="prog">Comentario (opcional, anónimo)</label>
   <textarea id="com">${esc(mine.c[actual]||"")}</textarea>`;
 }
 function extra(x){
   const l=[];
   if(x.precio!=null)l.push(`<span>Pagarían de media <b>${eur(x.precio)}</b></span>`);
-  if(x.detMedia!=null)l.push(x.ingredientes?.length?`<span>Detectaron de media <b>${x.detMedia.toFixed(1)} de ${x.ingredientes.length}</b> ingredientes</span>`:`<span>Detectaron de media <b>${x.detMedia.toFixed(1)}</b> ingredientes</span>`);
+  if(x.rep!=null)l.push(`<span>La repetirían <b>${Math.round(x.rep*100)} %</b></span>`);
   return l.length?`<div class="extra">${l.join("")}</div>`:"";
 }
 function premiosExtra(rank){
   let h="";
   const caro=rank.filter(t=>t.precio!=null).sort((a,b)=>b.precio-a.precio)[0];
   if(caro)h+=`<li><b>La que más pagarían:</b> ${esc(nom(caro))} (${eur(caro.precio)})</li>`;
-  const mis=rank.filter(t=>t.ingredientes?.length&&t.detMedia!=null).sort((a,b)=>a.detMedia/a.ingredientes.length-b.detMedia/b.ingredientes.length)[0];
-  if(mis)h+=`<li><b>La más enigmática:</b> ${esc(nom(mis))}</li>`;
+  const rp=rank.filter(t=>t.rep!=null).sort((a,b)=>b.rep-a.rep)[0];
+  if(rp&&rp.rep>0)h+=`<li><b>La más repetible:</b> ${esc(nom(rp))} (${Math.round(rp.rep*100)} %)</li>`;
   return h;
 }
 function calcular(){
@@ -245,8 +276,8 @@ function calcular(){
     const total=media(por.map(p=>p.v).filter(v=>v!=null));
     const coms=votos.map(x=>x.c?.[t.id]).filter(Boolean);
     const precio=media(votos.map(x=>x.p?.[t.id]).filter(v=>v!=null));
-    const det=votos.map(x=>x.i?.[t.id]).filter(Boolean).map(txt=>t.ingredientes?.length?aciertos(txt,t.ingredientes):lista(txt).length);
-    return {...t,por,total,coms,precio,detMedia:media(det)};
+    const rep=media(votos.map(x=>x.rp?.[t.id]).filter(v=>v!=null));
+    return {...t,por,total,coms,precio,rep};
   }).filter(t=>t.total!=null).sort((a,b)=>b.total-a.total);
 }
 function cargarRev(){
@@ -287,69 +318,200 @@ function pantallaResultados(){
       <li class="fila quieta"><span class="pos">${i+1}</span>
         <div>${i===0?'<span class="copa">Tapa ganadora</span>':''}<b>${esc(nom(t))}</b><small>${t.nombre?esc(t.etiqueta)+". ":""}Media ${t.total.toFixed(2)}</small></div>
         <span class="tier" data-t="${tier(t.total)}">${tier(t.total)}</span></li>`).join("")}</ol>
-      <h2 style="margin-top:28px">Premios</h2><ul class="premios">${premios}</ul>`;
+      <h2 style="margin-top:28px">Premios</h2><ul class="premios">${premios}</ul>${quiniela(rank)}<button class="pri chico" data-a="tarjeta">Compartir tarjeta del podio</button>`;
   }
   return `<h2>Resultados</h2>
   <p class="prog">${completo?"La votación está cerrada. Esta es la clasificación final.":"Toca un plato para descubrir qué tapa era y después su nota. Las dos mejores se revelan juntas al final."}</p>
   <ul class="rejilla">${grid}</ul>${acc}${fin}${completo?"":'<button class="sec chico" data-a="todo">Ver todo de golpe</button>'}`;
 }
+function pantallaQuien(){
+  return `<form id="quien" style="max-width:360px;margin:34px auto;display:grid;gap:12px"><h2>¿Quién eres?</h2>
+  <p class="prog">Escribe tu nombre (o el de tu pareja). Sirve para que no puedas votar tu propia tapa y se queda solo en tu móvil.</p>
+  <input type="text" id="yo" placeholder="Tu nombre" autocomplete="off" autocapitalize="none" autofocus>
+  <button class="pri">Entrar</button><p class="err" id="eq"></p></form>`;
+}
+function pantallaPrediccion(){
+  qlocal??={auto:null,podio:["","",""]};
+  const enviado=qs.some(x=>x.yo===yo);
+  const sel=n=>`<select data-q="${n}"><option value="">Elige…</option>${TAPAS.map(t=>`<option value="${t.id}" ${qlocal.podio[n]===t.id?"selected":""}>${esc(t.etiqueta)}</option>`).join("")}</select>`;
+  return `<h2>Votación cerrada</h2>
+  <p class="prog">Antes de los resultados, dos apuestas. ${enviado?"Tu apuesta está enviada: puedes cambiarla hasta que empiece la cuenta atrás.":"Envíala antes de que empiece la cuenta atrás."}</p>
+  <div class="crit ${qlocal.auto==null?"sin":""}" id="c-auto"><div class="fila-c"><label for="au">Autocrítica: ¿qué nota media sacará tu tapa?</label><output>${qlocal.auto==null?"–":fmt(qlocal.auto)}</output></div>
+    <input type="range" id="au" min="0" max="10" step="0.5" value="${qlocal.auto??7}"></div>
+  <div class="crit"><label>Quiniela: ¿quién hace el podio?</label>
+    <div class="quin"><span>1.º</span>${sel(0)}<span>2.º</span>${sel(1)}<span>3.º</span>${sel(2)}</div></div>
+  <div class="barra"><button class="pri" data-a="enviarq">${enviado?"Actualizar apuesta":"Enviar apuesta"}</button></div>`;
+}
+function quiniela(rank){
+  if(!qs.length)return "";
+  const top=rank.slice(0,3).map(t=>t.id),aut=id=>esc(TAPAS.find(t=>t.id===id)?.autor||"");
+  const pts=qs.map(q=>({q,p:(q.podio||[]).reduce((a,id,i)=>a+(id===top[i]?3:top.includes(id)?1:0),0)})).sort((a,b)=>b.p-a.p);
+  const dif=qs.map(q=>{const t=rank.find(x=>x.id===q.yo);return t?{q,t,d:q.auto-t.total}:null}).filter(Boolean);
+  const exacto=[...dif].sort((a,b)=>Math.abs(a.d)-Math.abs(b.d))[0],sobrado=[...dif].sort((a,b)=>b.d-a.d)[0];
+  return `<h2 style="margin-top:28px">Quiniela</h2><p class="prog">3 puntos por acertar la posición, 1 por acertar que está en el podio.</p>
+  <ul class="premios">${pts.map(x=>`<li><b>${aut(x.q.yo)}:</b> ${x.p} puntos</li>`).join("")}</ul>
+  <h2 style="margin-top:28px">Autocrítica</h2><ul class="premios">${dif.map(x=>`<li><b>${aut(x.q.yo)}</b> esperaba un ${fmt(x.q.auto)} y sacó un ${x.t.total.toFixed(2)}</li>`).join("")}
+  ${exacto?`<li><b>Mejor autocrítica:</b> ${aut(exacto.q.yo)}</li>`:""}${sobrado&&sobrado.d>0?`<li><b>El más sobrado:</b> ${aut(sobrado.q.yo)} (+${sobrado.d.toFixed(1)})</li>`:""}</ul>`;
+}
 function pantallaAdmin(){
+  const c=!!estado.closed,r=!!estado.resultados;
   return `<div class="barra"><button class="sec" data-a="volver">Volver</button></div>
   <h2>Panel del organizador</h2>
-  <p class="prog">${votos.length} personas han votado algo. ${estado.closed?"La votación está cerrada y todos ven los resultados.":"La votación está abierta."}</p>
-  ${estado.closed?"":'<p class="aviso">Al cerrar, todos verán solo los resultados y nadie podrá cambiar su voto.</p>'}
-  <div class="barra"><button class="${estado.closed?"pri":"peligro"}" data-a="cerrar">${estado.closed?"Reabrir la votación":"Cerrar votación y mostrar resultados"}</button></div>
+  <p class="prog">${votos.length} personas han votado algo.${c&&!r?` ${qs.length} de ${TAPAS.length} han enviado su apuesta.`:""}</p>
+  ${c?"":'<p class="aviso">Al cerrar, todos pasan a la autocrítica y la quiniela. Los resultados salen cuando tú los muestres.</p>'}
+  <div class="barra">${!c?'<button class="peligro" data-a="cerrar">Cerrar votación</button>':!r?'<button class="pri" data-a="mostrar">Mostrar resultados (cuenta atrás)</button>':'<button class="pri" data-a="cerrar">Reabrir la votación</button>'}</div>
   <div class="barra"><button class="sec" data-a="reiniciar">Reiniciar todos los votos</button></div>
-  <p class="prog">Reiniciar borra los votos de todos y reabre la votación. Cada móvil se queda limpio al instante.</p>`;
+  <p class="prog">Reiniciar borra los votos de todos y reabre la votación.</p>`;
 }
 function pintar(){
   if(!uid)return;
-  if(estado.closed&&vista!=="admin")vista="resultados";
-  else if(!estado.closed&&vista==="resultados")vista="lista";
-  const f={lista:pantallaLista,detalle:pantallaDetalle,resultados:pantallaResultados,admin:pantallaAdmin}[vista];
+  if(!yo){if(!$("#quien"))$("#app").innerHTML=pantallaQuien();return}
+  if(estado.closed&&vista!=="admin")vista=estado.resultados?"resultados":"prediccion";
+  else if(!estado.closed&&(vista==="resultados"||vista==="prediccion"))vista="lista";
+  const f={lista:pantallaLista,detalle:pantallaDetalle,prediccion:pantallaPrediccion,resultados:pantallaResultados,admin:pantallaAdmin}[vista];
   $("#app").innerHTML=f();
+}
+
+/* ---------- Sonido y efectos ---------- */
+const vib=m=>{try{navigator.vibrate?.(m)}catch(_){}};
+function tono(f,t0,d,tipo,v,f2){
+  const o=ac.createOscillator(),g=ac.createGain(),t=ac.currentTime+t0;
+  o.type=tipo;o.frequency.setValueAtTime(f,t);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+d);
+  g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.0001,t+d);
+  o.connect(g).connect(ac.destination);o.start(t);o.stop(t+d+.02);
+}
+function ruido(t0,d,v){
+  const n=Math.max(1,Math.floor(ac.sampleRate*d)),b=ac.createBuffer(1,n,ac.sampleRate),a=b.getChannelData(0);
+  for(let k=0;k<n;k++)a[k]=Math.random()*2-1;
+  const o=ac.createBufferSource(),g=ac.createGain(),t=ac.currentTime+t0;
+  o.buffer=b;g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.0001,t+d);
+  o.connect(g).connect(ac.destination);o.start(t);
+}
+const SFX={
+  tick:()=>tono(900,0,.04,"square",.03),
+  ding:()=>{tono(1318,0,.7,"sine",.16);tono(1976,0,.5,"sine",.07)},
+  moneda:()=>{tono(988,0,.08,"square",.05);tono(1319,.08,.35,"square",.05)},
+  ok:()=>[523,659,784,1047].forEach((f,k)=>tono(f,k*.07,.25,"triangle",.1)),
+  sarten:()=>ruido(0,.9,.05),
+  tambor:()=>{for(let k=0;k<14;k++)ruido(k*.07,.06,.04+k*.006)},
+  tacha:()=>[392,494,587].forEach(f=>tono(f,0,.6,"sawtooth",.05)),
+  fanfarria:()=>[[523,0],[659,.15],[784,.3],[1047,.45],[784,.7],[1047,.85]].forEach(([f,t])=>tono(f,t,.35,"sawtooth",.06)),
+  error:()=>tono(200,0,.25,"sawtooth",.07,120)
+};
+function sfx(n){if(mudo)return;try{ac??=new(window.AudioContext||window.webkitAudioContext)();ac.resume?.();SFX[n]()}catch(_){}}
+function tic(){const n=Date.now();if(n-tTick>70){tTick=n;sfx("tick");vib(8)}}
+function confeti(oro){
+  if(typeof matchMedia==="function"&&matchMedia("(prefers-reduced-motion:reduce)").matches)return;
+  const c=$("#cf"),x=c.getContext("2d");c.width=innerWidth;c.height=innerHeight;
+  const col=oro?["#ffb627","#ffd966","#fff3b0","#ff8a00"]:["#ffb627","#ff4d5e","#8bd17c","#f6f1e3","#4fb3a6"];
+  const ps=Array.from({length:oro?170:110},()=>({x:Math.random()*c.width,y:-20-Math.random()*c.height*.5,vx:(Math.random()-.5)*3,vy:2+Math.random()*4,s:5+Math.random()*7,r:Math.random()*6,c:col[Math.random()*col.length|0]}));
+  let f=0;
+  (function an(){x.clearRect(0,0,c.width,c.height);
+    ps.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.r+=.1;x.save();x.translate(p.x,p.y);x.rotate(p.r);x.fillStyle=p.c;x.fillRect(-p.s/2,-p.s/3,p.s,p.s*.6);x.restore()});
+    if(++f<220)requestAnimationFrame(an);else x.clearRect(0,0,c.width,c.height)})();
+}
+const HAT='<svg viewBox="0 0 64 64" width="96" height="96" aria-hidden="true"><g fill="#f6f1e3"><circle cx="20" cy="26" r="12"/><circle cx="32" cy="19" r="13"/><circle cx="44" cy="26" r="12"/><rect x="16" y="30" width="32" height="20" rx="3"/></g><rect x="16" y="45" width="32" height="9" rx="2" fill="#ffb627"/></svg>';
+function splash(){const o=$("#ov");o.innerHTML=`<div class="splash">${HAT}<span>MasChefFriends</span></div>`;setTimeout(()=>o.innerHTML="",1500)}
+function cuentaAtras(){
+  const o=$("#ov");let n=3;
+  const paso=()=>{
+    if(n>0){o.innerHTML=`<div class="cuenta"><b>${n}</b></div>`;sfx("tambor");vib(30);n--;setTimeout(paso,1000)}
+    else{o.innerHTML='<div class="cuenta"><b class="ya">¡Vamos!</b></div>';sfx("tacha");confeti();setTimeout(()=>o.innerHTML="",900)}
+  };
+  paso();
+}
+function tarjeta(){
+  const rank=calcular();if(!rank.length)return;
+  const c=document.createElement("canvas");c.width=1080;c.height=1350;const x=c.getContext("2d");
+  const rr=(a,b,w,h,r)=>{x.beginPath();x.roundRect?x.roundRect(a,b,w,h,r):x.rect(a,b,w,h)};
+  const g=x.createLinearGradient(0,0,0,1350);g.addColorStop(0,"#1d5049");g.addColorStop(1,"#0e2a27");x.fillStyle=g;x.fillRect(0,0,1080,1350);
+  for(let a=0;a<68;a++)for(let b=0;b<3;b++){x.fillStyle=(a+b)%2?"#fff8ec":"rgba(255,77,94,.75)";x.fillRect(a*16,b*16,16,16)}
+  x.textAlign="center";x.fillStyle="#f6f1e3";x.font="800 84px Unbounded,sans-serif";x.fillText("MasChefFriends",540,170);
+  x.fillStyle="#ff4d5e";rr(430,205,220,56,28);x.fill();x.fillStyle="#fff";x.font="700 30px Figtree,sans-serif";x.fillText("II Edición",540,243);
+  rank.slice(0,6).forEach((t,k)=>{
+    const y=330+k*160;
+    x.fillStyle=k?"#153a35":"#3a3210";rr(70,y,940,136,26);x.fill();x.strokeStyle=k?"#2c5a53":"#ffb627";x.lineWidth=k?2:5;x.stroke();
+    x.textAlign="left";x.fillStyle="#ffb627";x.font="800 56px Unbounded,sans-serif";x.fillText(String(k+1),110,y+86);
+    x.fillStyle="#f6f1e3";x.font="700 40px Figtree,sans-serif";x.fillText(nom(t),200,y+62);
+    x.fillStyle="#9db8b0";x.font="400 30px Figtree,sans-serif";x.fillText((k?"":"Tapa ganadora. ")+"Nota media "+t.total.toFixed(2),200,y+104);
+    x.textAlign="center";x.fillStyle=k?"#4fb3a6":"#ffb627";x.beginPath();x.arc(925,y+68,48,0,7);x.fill();
+    x.fillStyle="#0e2a27";x.font="800 36px Unbounded,sans-serif";x.fillText(tier(t.total),925,y+82);
+  });
+  x.fillStyle="#9db8b0";x.font="400 28px Figtree,sans-serif";x.textAlign="center";
+  x.fillText(new Date().toLocaleDateString("es-ES",{day:"numeric",month:"long",year:"numeric"}),540,1300);
+  c.toBlob(b=>{
+    const f=new File([b],"podio-maschefriends.png",{type:"image/png"});
+    if(navigator.canShare?.({files:[f]}))navigator.share({files:[f],title:"Podio MasChefFriends"}).catch(()=>{});
+    else{const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=f.name;a.click()}
+  });
 }
 
 /* ---------- Eventos ---------- */
 document.addEventListener("click",e=>{
-  const b=e.target.closest("[data-a]");if(!b||!uid)return;
+  const b=e.target.closest("[data-a]");if(!b)return;
   const a=b.dataset.a;
-  if(a==="abrir"){actual=b.dataset.id;vista="detalle";pintar();scrollTo(0,0)}
+  if(a==="mute"){mudo=!mudo;localStorage.setItem("tapas-mudo",mudo?"1":"0");b.textContent=mudo?"🔇":"🔊";if(!mudo)sfx("ding");return}
+  if(!uid)return;
+  if(a==="abrir"){if(b.dataset.id===yo)return;actual=b.dataset.id;vista="detalle";pintar();scrollTo(0,0)}
   else if(a==="volver"){vista="lista";pintar();scrollTo(0,0)}
+  else if(a==="quien"){yo=null;localStorage.removeItem("tapas-yo");pintar()}
   else if(a==="adm"){
     if(admin||prompt("Clave del organizador")===CLAVE_ORGANIZADOR){admin=true;vista="admin";pintar();scrollTo(0,0)}
-    else toast("Clave incorrecta")}
+    else{toast("Clave incorrecta");sfx("error")}}
+  else if(a==="rep"||a==="ing"){
+    const m=a==="rep"?"rp":"i";(mine[m]??={})[actual]=+b.dataset.v;
+    b.parentNode.querySelectorAll(".opc").forEach(x=>x.classList.toggle("on",x===b));sfx("tick");vib(10);guardar()}
+  else if(a==="enviarq"){
+    const q=qlocal;
+    if(!q||q.auto==null||q.podio.some(v=>!v)||new Set(q.podio).size<3){toast("Pon tu nota y tres tapas distintas");sfx("error");return}
+    setDoc(doc(db,"config","q_"+yo),{yo,auto:q.auto,podio:q.podio,ronda:estado.ronda||0})
+      .then(()=>{toast("Apuesta enviada");sfx("ok")}).catch(()=>toast("No se pudo enviar"))}
   else if(a==="voltear"){
     const d=datosRev(),id=b.dataset.id;
     if(d.ids.has(id)){
-      if(d.pend===0&&rev.f===0){rev.f=1;marcar(d.fin.map(t=>t.id));guardarRev();pintar()}
-      else toast("Esa se guarda para el gran final. Revela antes las demás.");
+      if(d.pend===0&&rev.f===0){rev.f=1;marcar(d.fin.map(t=>t.id));guardarRev();sfx("tacha");pintar()}
+      else{toast("Esa se guarda para el gran final. Revela antes las demás.");sfx("error")}
       return}
-    rev.e[id]=1;marcar([id]);guardarRev();pintar()}
-  else if(a==="nota"){rev.e[b.dataset.id]=2;marcar([b.dataset.id]);guardarRev();pintar()}
-  else if(a==="final"){const d=datosRev();rev.f=1;marcar(d.fin.map(t=>t.id));guardarRev();pintar()}
-  else if(a==="notasfinal"){const d=datosRev();rev.f=2;marcar(d.fin.map(t=>t.id));guardarRev();pintar()}
-  else if(a==="todo"){datosRev().rank.forEach(t=>rev.e[t.id]=2);rev.f=2;guardarRev();pintar()}
-  else if(a==="cerrar")setDoc(doc(db,"config","estado"),{closed:!estado.closed},{merge:true});
-  else if(a==="reiniciar"){if(confirm("¿Borrar los votos de TODOS y empezar de cero?"))setDoc(doc(db,"config","estado"),{ronda:(estado.ronda||0)+1,closed:false},{merge:true}).then(()=>toast("Votos reiniciados"))}
+    rev.e[id]=1;marcar([id]);guardarRev();sfx("tacha");pintar()}
+  else if(a==="nota"){rev.e[b.dataset.id]=2;marcar([b.dataset.id]);guardarRev();sfx("ding");pintar()}
+  else if(a==="final"){const d=datosRev();rev.f=1;marcar(d.fin.map(t=>t.id));guardarRev();sfx("tacha");pintar()}
+  else if(a==="notasfinal"){const d=datosRev();rev.f=2;marcar(d.fin.map(t=>t.id));guardarRev();pintar();sfx("fanfarria");confeti(d.fin[0]&&tier(d.fin[0].total)==="S++")}
+  else if(a==="todo"){datosRev().rank.forEach(t=>rev.e[t.id]=2);rev.f=2;guardarRev();pintar();sfx("fanfarria");confeti()}
+  else if(a==="tarjeta")tarjeta();
+  else if(a==="cerrar")setDoc(doc(db,"config","estado"),{closed:!estado.closed,resultados:false},{merge:true});
+  else if(a==="mostrar")setDoc(doc(db,"config","estado"),{resultados:true},{merge:true});
+  else if(a==="reiniciar"){if(confirm("¿Borrar los votos de TODOS y empezar de cero?"))setDoc(doc(db,"config","estado"),{ronda:(estado.ronda||0)+1,closed:false,resultados:false},{merge:true}).then(()=>toast("Votos reiniciados"))}
 });
 document.addEventListener("input",e=>{
   const el=e.target;
+  if(vista==="prediccion"&&el.id==="au"){
+    qlocal.auto=parseFloat(el.value);const bx=$("#c-auto");bx.classList.remove("sin");bx.querySelector("output").textContent=fmt(qlocal.auto);tic();return}
   if(vista!=="detalle")return;
   if(el.id==="pr"){
     const v=parseFloat(el.value);(mine.p??={})[actual]=v;
-    const box=$("#c-precio");box.classList.remove("sin");box.querySelector("output").textContent=eur(v);guardar();
-  }else if(el.id==="ing"){
-    (mine.i??={})[actual]=el.value;$("#ni").textContent=lista(el.value).length+" detectados";guardar();
+    const bx=$("#c-precio");bx.classList.remove("sin");bx.querySelector("output").textContent=eur(v);
+    const n=Date.now();if(n-tTick>110){tTick=n;sfx("moneda");vib(8)}
+    guardar();
   }else if(el.matches("input[type=range]")){
-    const k=el.dataset.k,v=parseFloat(el.value);
+    const k=el.dataset.k,v=parseFloat(el.value),antes=completa(actual);
     (mine.r[actual]??={})[k]=v;
-    const box=$("#c-"+k);box.classList.remove("sin");box.querySelector("output").textContent=fmt(v);
+    const bx=$("#c-"+k);bx.classList.remove("sin");bx.querySelector("output").textContent=fmt(v);
+    tic();
+    if(!antes&&completa(actual)){sfx("ok");vib([20,40,20]);$(".plato.grande")?.classList.add("lleno")}
     guardar();
   }else if(el.id==="com"){mine.c[actual]=el.value;guardar()}
 });
+document.addEventListener("change",e=>{const el=e.target;if(el.matches?.("select[data-q]")&&qlocal)qlocal.podio[+el.dataset.q]=el.value});
+document.addEventListener("submit",e=>{
+  if(e.target.id!=="quien")return;
+  e.preventDefault();
+  const id=buscarYo($("#yo").value);
+  if(!id){$("#eq").textContent="No te encuentro. Prueba con tu nombre o el de tu pareja.";sfx("error");return}
+  yo=id;localStorage.setItem("tapas-yo",id);sfx("sarten");setTimeout(()=>sfx("ding"),350);splash();pintar();
+});
 
-localStorage.getItem("tapas-ok")==="1"?arrancar():puerta();
+$(".mute").textContent=mudo?"🔇":"🔊";
+if(localStorage.getItem("tapas-ok")==="1"){splash();arrancar()}else puerta();
 </script>
 </body>
 </html>
