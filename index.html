@@ -106,6 +106,8 @@ ol.rank{list-style:none;margin:0;padding:0;display:grid;gap:12px}
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
 .chipb{padding:6px 12px;background:transparent;border:2px solid #0e2a27;color:#0e2a27}
 .chipb.on{background:#0e2a27;color:#fffaf0}
+.progbar{height:10px;border-radius:6px;background:var(--fondo);overflow:hidden;margin-top:8px}
+.progbar i{display:block;height:100%;background:linear-gradient(90deg,var(--chile),var(--azafran),var(--pista))}
 .plato b.dos{font-size:1.45rem}
 .chip{display:inline-block;background:var(--fondo);border:1px solid var(--linea);border-radius:20px;padding:1px 10px;font-weight:700;color:var(--azafran);font-size:.9rem}
 .extra{display:grid;gap:4px;width:100%;color:var(--suave);text-align:left;font-size:.95rem}
@@ -366,11 +368,14 @@ function quiniela(rank){
   <h2 style="margin-top:28px">Autocrítica</h2><ul class="premios">${dif.map(x=>`<li><b>${aut(x.q.yo)}</b> esperaba un ${fmt(x.q.auto)} y sacó un ${x.t.total.toFixed(2)}</li>`).join("")}
   ${exacto?`<li><b>Mejor autocrítica:</b> ${aut(exacto.q.yo)}</li>`:""}${sobrado&&sobrado.d>0?`<li><b>El más sobrado:</b> ${aut(sobrado.q.yo)} (+${sobrado.d.toFixed(1)})</li>`:""}</ul>`;
 }
+const completosN=()=>votos.filter(v=>TAPAS.filter(t=>CRITERIOS.every(c=>v.r?.[t.id]?.[c.k]!=null)).length>=TAPAS.length-1).length;
 function pantallaAdmin(){
-  const c=!!estado.closed,r=!!estado.resultados;
+  const c=!!estado.closed,r=!!estado.resultados,n=completosN(),tot=TAPAS.length,pct=Math.round(n/tot*100);
   return `<div class="barra"><button class="sec" data-a="volver">Volver</button></div>
   <h2>Panel del organizador</h2>
-  <p class="prog">${votos.length} personas han votado algo.${c&&!r?` ${qs.length} de ${TAPAS.length} han enviado su apuesta.`:""}</p>
+  <div class="crit"><div class="fila-c"><label>Han votado todas sus tapas</label><output>${n} / ${tot}</output></div>
+    <div class="progbar"><i style="width:${pct}%"></i></div>
+    <p class="prog" style="margin:8px 0 0">${votos.length} de ${tot} han enviado algún voto.${!c&&n<tot?" Aún faltan por terminar.":""}${c&&!r?` ${qs.length} de ${tot} han enviado su apuesta.`:""}</p></div>
   ${c?"":'<p class="aviso">Al cerrar, todos pasan a la autocrítica y la quiniela. Los resultados salen cuando tú los muestres.</p>'}
   <div class="barra">${!c?'<button class="peligro" data-a="cerrar">Cerrar votación</button>':!r?'<button class="pri" data-a="mostrar">Mostrar resultados (cuenta atrás)</button>':'<button class="pri" data-a="cerrar">Reabrir la votación</button>'}</div>
   <div class="barra"><button class="sec" data-a="reiniciar">Reiniciar todos los votos</button></div>
@@ -511,7 +516,9 @@ document.addEventListener("click",e=>{
   else if(a==="notasfinal"){const d=datosRev();rev.f=2;marcar(d.fin.map(t=>t.id));guardarRev();pintar();sfx("fanfarria");confeti(d.fin[0]&&tier(d.fin[0].total)==="S++")}
   else if(a==="todo"){datosRev().rank.forEach(t=>rev.e[t.id]=2);rev.f=2;guardarRev();pintar();sfx("fanfarria");confeti()}
   else if(a==="tarjeta")tarjeta();
-  else if(a==="cerrar")setDoc(doc(db,"config","estado"),{closed:!estado.closed,resultados:false},{merge:true});
+  else if(a==="cerrar"){
+    if(!estado.closed&&completosN()<TAPAS.length&&!confirm("Solo "+completosN()+" de "+TAPAS.length+" han votado todas sus tapas. ¿Cerrar igualmente?"))return;
+    setDoc(doc(db,"config","estado"),{closed:!estado.closed,resultados:false},{merge:true})}
   else if(a==="mostrar")setDoc(doc(db,"config","estado"),{resultados:true},{merge:true});
   else if(a==="reiniciar"){if(confirm("¿Borrar los votos de TODOS y empezar de cero?"))setDoc(doc(db,"config","estado"),{ronda:(estado.ronda||0)+1,closed:false,resultados:false},{merge:true}).then(()=>toast("Votos reiniciados"))}
 });
