@@ -97,6 +97,15 @@ ol.rank{list-style:none;margin:0;padding:0;display:grid;gap:12px}
 @keyframes bote{from{transform:translateY(-60px) scale(.6)}to{transform:none}}
 @keyframes golpe{from{transform:scale(2);opacity:0}30%{opacity:1}to{transform:scale(.9);opacity:.6}}
 @keyframes lleno{40%{transform:scale(1.15);box-shadow:0 0 0 8px rgba(255,182,39,.35)}}
+.precio{background:#fffaf0;color:#0e2a27;border:0;border-bottom:6px dotted var(--chile);border-radius:10px}
+.precio label{color:#0e2a27}
+.ticket{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:6px 0}
+.ticket output{font-family:Unbounded,sans-serif;font-size:2.3rem;font-weight:800;color:#0e2a27}
+.precio.sin output{color:#8a9a95}
+.mas{width:52px;height:52px;border-radius:50%;background:var(--fondo);color:var(--texto);font-size:1.7rem;padding:0}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.chipb{padding:6px 12px;background:transparent;border:2px solid #0e2a27;color:#0e2a27}
+.chipb.on{background:#0e2a27;color:#fffaf0}
 .plato b.dos{font-size:1.45rem}
 .chip{display:inline-block;background:var(--fondo);border:1px solid var(--linea);border-radius:20px;padding:1px 10px;font-weight:700;color:var(--azafran);font-size:.9rem}
 .extra{display:grid;gap:4px;width:100%;color:var(--suave);text-align:left;font-size:.95rem}
@@ -162,7 +171,7 @@ const CRITERIOS = [
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const nom=t=>t.nombre||t.etiqueta;
-const eur=v=>v>=10?"10+ €":v.toFixed(2).replace(".",",")+" €";
+const eur=v=>v>=15?"15+ €":v.toFixed(2).replace(".",",")+" €";
 const inic=a=>a.split(/\s+y\s+/i).map(x=>x.trim()[0]||"").join(" & ");
 const norm=s=>String(s).normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
 const col=s=>norm(s).replace(/[^a-z0-9]/g,"").replace(/(.)\1+/g,"$1");
@@ -175,7 +184,7 @@ function buscarYo(txt){
 const fmt=n=>Number.isInteger(n)?String(n):n.toFixed(1);
 const tier=n=>n>=9.999?"S++":n>=9.5?"S+":n>=9?"S":n>=8?"A":n>=7?"B":n>=6?"C":n>=5?"D":n>=4?"E":"F";
 let rev={e:{},f:0},revRonda=null,nuevos=new Set();
-let db,uid,mine={r:{},c:{},p:{},i:{}},raw=null,todos=[],ronda=null,estado={},votos=[],vista="lista",actual=null,admin=false,timer,animado=false,yo=localStorage.getItem("tapas-yo"),qs=[],qlocal=null,resPrev=null,tTick=0,ac=null,mudo=localStorage.getItem("tapas-mudo")==="1";
+let db,uid,mine={r:{},c:{},p:{},i:{}},raw=null,todos=[],ronda=null,estado={},votos=[],vista="lista",actual=null,admin=false,timer,animado=false,yo=localStorage.getItem("tapas-yo"),qs=[],qlocal=null,resPrev=null,tTick=0,bor=null,prof=0,ac=null,mudo=localStorage.getItem("tapas-mudo")==="1";
 
 function toast(m){const e=$("#toast");e.textContent=m;e.classList.add("on");clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove("on"),1400)}
 const completa=id=>CRITERIOS.every(c=>mine.r[id]?.[c.k]!=null);
@@ -238,23 +247,27 @@ function pantallaLista(){
     return `<li><button class="tapa ${ok?"ok":""}" data-a="abrir" data-id="${t.id}"><span class="plato"><b class="${ok?"":cls(t.autor)}">${ok?fmt(media(vals)):esc(inic(t.autor))}</b><small>${ok?"tu nota":vals.length?"a medias":"sin votar"}</small></span><span class="cap">${esc(t.etiqueta)}</span></button></li>`}).join("")}</ul>
   <button class="sec chico" data-a="quien">Entras como ${esc(mi?.autor||"")}. ¿No eres tú? Cambiar</button>`;
 }
+const borOk=()=>CRITERIOS.every(c=>bor.r[c.k]!=null);
 function pantallaDetalle(){
-  const i=TAPAS.findIndex(x=>x.id===actual),t=TAPAS[i],r=mine.r[actual]||{},pr=mine.p?.[actual],rp=mine.rp?.[actual],ig=mine.i?.[actual];
-  const opc=(a,v)=>`<div class="opcs"><button class="opc ${v===1?"on":""}" data-a="${a}" data-v="1">Sí</button><button class="opc ${v===0?"on":""}" data-a="${a}" data-v="0">No</button></div>`;
+  const t=TAPAS.find(x=>x.id===actual),r=bor.r,pr=bor.p,rp=bor.rp;
+  const opc=v=>`<div class="opcs"><button class="opc ${v===1?"on":""}" data-a="rep" data-v="1">Sí</button><button class="opc ${v===0?"on":""}" data-a="rep" data-v="0">No</button></div>`;
   return `<div class="barra"><button class="sec" data-a="volver">Volver a las tapas</button></div>
   <span class="plato grande"><b class="${inic(t.autor).length<2?"":"dos"}">${esc(inic(t.autor))}</b><small>tapa</small></span>
   <h2 style="text-align:center">${esc(t.etiqueta)}</h2>
-  <p class="prog" style="text-align:center">Mueve cada plato de 0 a 10. Se guarda solo.</p>
+  <p class="prog" style="text-align:center">Mueve cada plato de 0 a 10. Cuando termines, pulsa Enviar voto al final.</p>
   ${CRITERIOS.map(c=>{const v=r[c.k];return `<div class="crit ${v==null?"sin":""}" id="c-${c.k}">
     <div class="fila-c"><label for="s-${c.k}">${c.n}</label><output>${v==null?"–":fmt(v)}</output></div>
     <input type="range" id="s-${c.k}" data-k="${c.k}" min="0" max="10" step="0.5" value="${v??5}"></div>`}).join("")}
-  <div class="crit ${pr==null?"sin":""}" id="c-precio">
-    <div class="fila-c"><label for="pr">¿Cuánto pagarías por esta tapa?</label><output>${pr==null?"–":eur(pr)}</output></div>
-    <input type="range" id="pr" min="0" max="10" step="0.5" value="${pr??3}"></div>
-  <div class="crit"><label>¿La repetirías?</label>${opc("rep",rp)}</div>
-  <div class="crit"><label>¿Eres capaz de decir todos sus ingredientes?</label>${opc("ing",ig)}</div>
+  <div class="crit precio ${pr==null?"sin":""}" id="c-precio">
+    <label>¿Cuánto pagarías por esta tapa?</label>
+    <div class="ticket"><button class="mas" data-a="precio" data-d="-0.5" aria-label="Menos">−</button><output id="pv">${pr==null?"– €":eur(pr)}</output><button class="mas" data-a="precio" data-d="0.5" aria-label="Más">+</button></div>
+    <div class="chips">${[1,2,3,5,8,10,15].map(v=>`<button class="chipb ${pr===v?"on":""}" data-a="precio" data-v="${v}">${v} €</button>`).join("")}</div></div>
+  <div class="crit"><label>¿La repetirías?</label>${opc(rp)}</div>
+  <div class="crit"><label for="ing">¿Eres capaz de escribir todos sus ingredientes?</label>
+    <textarea id="ing" placeholder="Escribe todos los que notes, separados por comas" style="margin-top:8px">${esc(bor.i)}</textarea></div>
   <label for="com" class="prog">Comentario (opcional, anónimo)</label>
-  <textarea id="com">${esc(mine.c[actual]||"")}</textarea>`;
+  <textarea id="com">${esc(bor.c)}</textarea>
+  <div class="barra" style="margin-top:18px"><button class="pri" data-a="enviar">Enviar voto</button></div>`;
 }
 function extra(x){
   const l=[];
@@ -447,20 +460,40 @@ function tarjeta(){
 }
 
 /* ---------- Eventos ---------- */
+function entrar(v){if(prof===0){history.pushState({v},"");prof=1}else history.replaceState({v},"")}
+function salir(){vista="lista";bor=null;pintar();scrollTo(0,0);if(prof>0)history.back()}
+window.addEventListener("popstate",()=>{prof=0;vista="lista";bor=null;pintar();scrollTo(0,0)});
 document.addEventListener("click",e=>{
   const b=e.target.closest("[data-a]");if(!b)return;
   const a=b.dataset.a;
   if(a==="mute"){mudo=!mudo;localStorage.setItem("tapas-mudo",mudo?"1":"0");b.textContent=mudo?"🔇":"🔊";if(!mudo)sfx("ding");return}
   if(!uid)return;
-  if(a==="abrir"){if(b.dataset.id===yo)return;actual=b.dataset.id;vista="detalle";pintar();scrollTo(0,0)}
-  else if(a==="volver"){vista="lista";pintar();scrollTo(0,0)}
+  if(a==="abrir"){
+    if(b.dataset.id===yo)return;
+    actual=b.dataset.id;
+    bor={r:{...(mine.r[actual]||{})},p:mine.p?.[actual],rp:mine.rp?.[actual],i:mine.i?.[actual]||"",c:mine.c?.[actual]||""};
+    vista="detalle";entrar("detalle");pintar();scrollTo(0,0)}
+  else if(a==="volver")salir();
   else if(a==="quien"){yo=null;localStorage.removeItem("tapas-yo");pintar()}
   else if(a==="adm"){
-    if(admin||prompt("Clave del organizador")===CLAVE_ORGANIZADOR){admin=true;vista="admin";pintar();scrollTo(0,0)}
+    if(admin||prompt("Clave del organizador")===CLAVE_ORGANIZADOR){admin=true;vista="admin";entrar("admin");pintar();scrollTo(0,0)}
     else{toast("Clave incorrecta");sfx("error")}}
-  else if(a==="rep"||a==="ing"){
-    const m=a==="rep"?"rp":"i";(mine[m]??={})[actual]=+b.dataset.v;
-    b.parentNode.querySelectorAll(".opc").forEach(x=>x.classList.toggle("on",x===b));sfx("tick");vib(10);guardar()}
+  else if(a==="precio"){
+    const v=b.dataset.v!=null?+b.dataset.v:Math.min(15,Math.max(0,(bor.p??3)+ +b.dataset.d));
+    bor.p=v;const bx=$("#c-precio");bx.classList.remove("sin");$("#pv").textContent=eur(v);
+    bx.querySelectorAll(".chipb").forEach(x=>x.classList.toggle("on",+x.dataset.v===v));sfx("moneda");vib(8)}
+  else if(a==="rep"){
+    bor.rp=+b.dataset.v;b.parentNode.querySelectorAll(".opc").forEach(x=>x.classList.toggle("on",x===b));sfx("tick");vib(10)}
+  else if(a==="enviar"){
+    const falta=CRITERIOS.find(c=>bor.r[c.k]==null);
+    if(falta){toast("Falta puntuar: "+falta.n);sfx("error");$("#c-"+falta.k)?.scrollIntoView?.({block:"center",behavior:"smooth"});return}
+    mine.r[actual]=bor.r;mine.c[actual]=bor.c;mine.i[actual]=bor.i;
+    mine.p??={};mine.rp??={};
+    if(bor.p!=null)mine.p[actual]=bor.p;
+    if(bor.rp!=null)mine.rp[actual]=bor.rp;
+    setDoc(doc(db,"votes",uid),{r:mine.r,c:mine.c,p:mine.p,i:mine.i,rp:mine.rp,ronda:estado.ronda||0})
+      .then(()=>toast("Voto enviado")).catch(()=>toast("No se pudo enviar, prueba otra vez"));
+    sfx("ok");vib([20,40,20]);salir()}
   else if(a==="enviarq"){
     const q=qlocal;
     if(!q||q.auto==null||q.podio.some(v=>!v)||new Set(q.podio).size<3){toast("Pon tu nota y tres tapas distintas");sfx("error");return}
@@ -486,20 +519,15 @@ document.addEventListener("input",e=>{
   const el=e.target;
   if(vista==="prediccion"&&el.id==="au"){
     qlocal.auto=parseFloat(el.value);const bx=$("#c-auto");bx.classList.remove("sin");bx.querySelector("output").textContent=fmt(qlocal.auto);tic();return}
-  if(vista!=="detalle")return;
-  if(el.id==="pr"){
-    const v=parseFloat(el.value);(mine.p??={})[actual]=v;
-    const bx=$("#c-precio");bx.classList.remove("sin");bx.querySelector("output").textContent=eur(v);
-    const n=Date.now();if(n-tTick>110){tTick=n;sfx("moneda");vib(8)}
-    guardar();
-  }else if(el.matches("input[type=range]")){
-    const k=el.dataset.k,v=parseFloat(el.value),antes=completa(actual);
-    (mine.r[actual]??={})[k]=v;
+  if(vista!=="detalle"||!bor)return;
+  if(el.matches("input[type=range]")){
+    const k=el.dataset.k,v=parseFloat(el.value),antes=borOk();
+    bor.r[k]=v;
     const bx=$("#c-"+k);bx.classList.remove("sin");bx.querySelector("output").textContent=fmt(v);
     tic();
-    if(!antes&&completa(actual)){sfx("ok");vib([20,40,20]);$(".plato.grande")?.classList.add("lleno")}
-    guardar();
-  }else if(el.id==="com"){mine.c[actual]=el.value;guardar()}
+    if(!antes&&borOk()){sfx("ok");vib([20,40,20]);$(".plato.grande")?.classList.add("lleno")}
+  }else if(el.id==="ing")bor.i=el.value;
+  else if(el.id==="com")bor.c=el.value;
 });
 document.addEventListener("change",e=>{const el=e.target;if(el.matches?.("select[data-q]")&&qlocal)qlocal.podio[+el.dataset.q]=el.value});
 document.addEventListener("submit",e=>{
