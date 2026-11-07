@@ -161,7 +161,7 @@ const TAPAS = [                       // "nombre" es opcional: si lo rellenas, s
   {id:"t1", etiqueta:"Tapa de Lara", nombre:"", autor:"Lara"},
   {id:"t2", etiqueta:"Tapa de Kk", nombre:"", autor:"Kk"},
   {id:"t3", etiqueta:"Tapa de Hicham y Jeza", nombre:"", autor:"Hicham y Jeza"},
-  {id:"t4", etiqueta:"Tapa de Ferran y Alex", nombre:"", autor:"Ferran y Alex"},
+  {id:"t4", etiqueta:"Tapa de Piero", nombre:"", autor:"Piero", alias:["Ferran"]},
   {id:"t5", etiqueta:"Tapa de Iker y Ana", nombre:"", autor:"Iker y Ana"}
 ];
 const CRITERIOS = [
@@ -181,7 +181,7 @@ const dist=(a,b)=>{const d=Array.from({length:a.length+1},(_,i)=>[i,...Array(b.l
 function buscarYo(txt){
   const ks=norm(txt).split(/\s+y\s+|[\s,&+]+/).map(col).filter(Boolean);
   if(!ks.length)return null;
-  return TAPAS.find(t=>t.autor.split(/\s+y\s+/i).map(col).some(n=>ks.some(k=>k===n||(n.length>3&&k.length>3&&dist(k,n)<=1))))?.id||null;
+  return TAPAS.find(t=>[...t.autor.split(/\s+y\s+/i),...(t.alias||[])].map(col).some(n=>ks.some(k=>k===n||(n.length>3&&k.length>3&&dist(k,n)<=1))))?.id||null;
 }
 const fmt=n=>Number.isInteger(n)?String(n):n.toFixed(1);
 const tier=n=>n>=9.999?"S++":n>=9.5?"S+":n>=9?"S":n>=8?"A":n>=7?"B":n>=6?"C":n>=5?"D":n>=4?"E":"F";
@@ -392,6 +392,9 @@ function pintar(){
 
 /* ---------- Sonido y efectos ---------- */
 const vib=m=>{try{navigator.vibrate?.(m)}catch(_){}};
+let audioLara=null;
+try{audioLara=new Audio("lara.mp3");audioLara.preload="auto"}catch(_){}
+function sonarLara(){if(mudo||!audioLara)return;try{audioLara.currentTime=0;const r=audioLara.play();r?.catch?.(()=>{})}catch(_){}}
 function tono(f,t0,d,tipo,v,f2){
   const o=ac.createOscillator(),g=ac.createGain(),t=ac.currentTime+t0;
   o.type=tipo;o.frequency.setValueAtTime(f,t);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+d);
@@ -475,7 +478,7 @@ document.addEventListener("click",e=>{
   if(!uid)return;
   if(a==="abrir"){
     if(b.dataset.id===yo)return;
-    actual=b.dataset.id;
+    actual=b.dataset.id;if(actual==="t1")sonarLara();
     bor={r:{...(mine.r[actual]||{})},p:mine.p?.[actual],rp:mine.rp?.[actual],i:mine.i?.[actual]||"",c:mine.c?.[actual]||""};
     vista="detalle";entrar("detalle");pintar();scrollTo(0,0)}
   else if(a==="volver")salir();
@@ -498,7 +501,8 @@ document.addEventListener("click",e=>{
     if(bor.rp!=null)mine.rp[actual]=bor.rp;
     setDoc(doc(db,"votes",uid),{r:mine.r,c:mine.c,p:mine.p,i:mine.i,rp:mine.rp,ronda:estado.ronda||0})
       .then(()=>toast("Voto enviado")).catch(()=>toast("No se pudo enviar, prueba otra vez"));
-    sfx("ok");vib([20,40,20]);salir()}
+    if(actual==="t1")sonarLara();else sfx("ok");
+    vib([20,40,20]);salir()}
   else if(a==="enviarq"){
     const q=qlocal;
     if(!q||q.auto==null||q.podio.some(v=>!v)||new Set(q.podio).size<3){toast("Pon tu nota y tres tapas distintas");sfx("error");return}
